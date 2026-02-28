@@ -1,0 +1,269 @@
+{
+  "ManifestName": "BaseStarDataManifest",
+  "Provider": {
+    "Name": "BaseStarDataManifestDWIS",
+    "Company": "Halliburton"
+  },
+  "InjectionInformation": {
+    "ServerName": "sourceserver",
+    "EndPointURL": "",
+    "PublishingIntervalInMS": 0,
+    "InjectedVariablesNamespaceAlias": "variables",
+    "InjectedNodesNamespaceAlias": "nodes",
+    "ProvidedVariablesNamespaceAlias": "providedNodes",
+    "InjectedVocabularyNamespaceAlias": "Vocabulary"
+  },
+  "InjectedVariables": [],
+  "InjectedNodes": [
+    {
+      "TypeDictionaryURI": "CorrectedMeasurement",
+      "BrowseName": "BaseStarMeasuredAverageCorrectedTorque#01",
+      "UniqueName": "BaseStarMeasuredAverageCorrectedTorque#01",
+      "DisplayName": "BaseStarMeasuredAverageCorrectedTorque#01",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "MovingAverage",
+      "BrowseName": "MovingAverageBaseStarMeasuredAverageCorrectedTorque",
+      "UniqueName": "MovingAverageBaseStarMeasuredAverageCorrectedTorque",
+      "DisplayName": "MovingAverageBaseStarMeasuredAverageCorrectedTorque",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "SummationTransformation",
+      "BrowseName": "taringTransformationAverageTorque",
+      "UniqueName": "taringTransformationAverageTorque",
+      "DisplayName": "taringTransformationAverageTorque",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "DerivedMeasurement",
+      "BrowseName": "BaseStarMeasuredAverageRawTorque#01",
+      "UniqueName": "BaseStarMeasuredAverageRawTorque#01",
+      "DisplayName": "BaseStarMeasuredAverageRawTorque#01",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "ProcessData",
+      "BrowseName": "TorqueBiasForMudPulseTelemetry#01",
+      "UniqueName": "TorqueBiasForMudPulseTelemetry#01",
+      "DisplayName": "TorqueBiasForMudPulseTelemetry#01",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "GaussianUncertainty",
+      "BrowseName": "GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorque#01",
+      "UniqueName": "GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorque#01",
+      "DisplayName": "GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorque#01",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "MudPulseTelemetry",
+      "BrowseName": "mudPulseTelemetry",
+      "UniqueName": "mudPulseTelemetry",
+      "DisplayName": "mudPulseTelemetry",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "BHAMechanicalLogicalElement",
+      "BrowseName": "BHA#01",
+      "UniqueName": "BHA#01",
+      "DisplayName": "BHA#01",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "InstrumentationCompany",
+      "BrowseName": "Halliburton#01",
+      "UniqueName": "Halliburton#01",
+      "DisplayName": "Halliburton#01",
+      "Fields": null
+    }
+  ],
+  "InjectedReferences": [
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/BelongsToClass",
+      "Object": {
+        "NameSpace": "http://ddhub.no",
+        "ID": "ContinuousDataType"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageRawTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/BelongsToClass",
+      "Object": {
+        "NameSpace": "http://ddhub.no",
+        "ID": "ContinuousDataType"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "TorqueBiasForMudPulseTelemetry#01"
+      },
+      "VerbURI": "http://ddhub.no/BelongsToClass",
+      "Object": {
+        "NameSpace": "http://ddhub.no",
+        "ID": "ContinuousDataType"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/HasDynamicValue",
+      "Object": {
+        "NameSpace": "providedNodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/IsOfMeasurableQuantity",
+      "Object": {
+        "NameSpace": "http://ddhub.no/UnitAndQuantity",
+        "ID": "torqueDrilling"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/IsTransformationOutput",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "MovingAverageBaseStarMeasuredAverageCorrectedTorque"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageRawTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/IsOfMeasurableQuantity",
+      "Object": {
+        "NameSpace": "http://ddhub.no/UnitAndQuantity",
+        "ID": "torqueDrilling"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageRawTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/IsTransformationInput",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "taringTransformationAverageTorque"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "TorqueBiasForMudPulseTelemetry#01"
+      },
+      "VerbURI": "http://ddhub.no/IsOfMeasurableQuantity",
+      "Object": {
+        "NameSpace": "http://ddhub.no/UnitAndQuantity",
+        "ID": "torqueDrilling"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "TorqueBiasForMudPulseTelemetry#01"
+      },
+      "VerbURI": "http://ddhub.no/IsTransformationInput",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "taringTransformationAverageTorque"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/IsTransformationOutput",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "taringTransformationAverageTorque"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/HasUncertainty",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorque#01"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/HasUncertaintyMean",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/IsTransmittedBy",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "mudPulseTelemetry"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/IsMechanicallyLocatedAt",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "BHA#01"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarMeasuredAverageCorrectedTorque#01"
+      },
+      "VerbURI": "http://ddhub.no/IsProvidedBy",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "Halliburton#01"
+      }
+    }
+  ],
+  "ProvidedVariables": [
+    {
+      "VariableID": "BaseStarMeasuredAverageCorrectedTorque",
+      "Rank": 0,
+      "Dimensions": null,
+      "DataType": "double"
+    }
+  ],
+  "InjectedVocabulary": null
+}

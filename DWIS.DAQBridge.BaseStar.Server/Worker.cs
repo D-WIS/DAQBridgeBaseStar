@@ -1,18 +1,17 @@
 using DWIS.Client.ReferenceImplementation.OPCFoundation;
 using DWIS.RigOS.Common.Worker;
 using OSDC.DotnetLibraries.General.Common;
-using System.Reflection;
 using DWIS.DAQBridge.BaseStar.Model;
 
 namespace DWIS.DAQBridge.BaseStar.Server
 {
-    public class Worker : DWISWorkerWithOPCUA<ConfigurationForOPCUA>
+    public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStar>
     {
         private MechanicalSubOutputDataMudPulseTelemetry MechanicalSubData { get; set; } = new MechanicalSubOutputDataMudPulseTelemetry();
 
         private TimeSpan OPCUALoopSpan { get; set; } = TimeSpan.FromSeconds(1);
 
-        public Worker(ILogger<IDWISWorker<ConfigurationForOPCUA>> logger, ILogger<DWISClientOPCF>? loggerDWISClient) : base(logger, loggerDWISClient)
+        public Worker(ILogger<IDWISWorker<ConfigurationForBaseStar>> logger, ILogger<DWISClientOPCF>? loggerDWISClient) : base(logger, loggerDWISClient)
         {
         }
 
@@ -23,6 +22,10 @@ namespace DWIS.DAQBridge.BaseStar.Server
             if (Configuration is not null && _DWISClient != null && _DWISClient.Connected)
             {
                 OPCUALoopSpan = Configuration.OPCUALoopDuration;
+                if (Configuration.InitializeInputOPCUAVariables)
+                {
+                    await RegisterToOPCUA(MechanicalSubData, "BaseStarDataManifest", "Halliburton");
+                }
                 await RegisterToBlackboard(MechanicalSubData);
                 await Loop(stoppingToken);
             }
@@ -47,7 +50,6 @@ namespace DWIS.DAQBridge.BaseStar.Server
             {
                 try
                 {
-                    // process series
                     await ReadOPCUA(MechanicalSubData, Configuration?.NameSpace, Configuration?.NodeIDPrefix, Configuration?.OPCUAIDs, Configuration?.UnitConversions);
                     k++;
                     if (k == count)
@@ -72,7 +74,7 @@ namespace DWIS.DAQBridge.BaseStar.Server
                 {
                     Logger?.LogError(e.ToString());
                 }
-                ConfigurationUpdater<ConfigurationForOPCUA>.Instance.UpdateConfiguration(this);
+                ConfigurationUpdater<ConfigurationForBaseStar>.Instance.UpdateConfiguration(this);
             }
         }
     }
