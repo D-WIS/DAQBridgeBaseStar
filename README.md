@@ -8,7 +8,7 @@ The solution is organized around a single goal: reliably map Base Star signals i
 - `DWIS.DAQBridge.BaseStar.Model` - The authoritative semantic model for Base Star signals.
 - `DWIS.DAQBridge.BaseStar.ExportDataStructures` - Helper tool to generate signal manifests for DWIS.
 - `DWIS.DAQBridge.BaseStar.OPCUASource` - OPC-UA source to publish Base Star signals for testing and integration.
-- `DWIS.DAQBridge.BaseStar.OPCUASink` - OPC-UA sink to read signals back from the DWIS Blackboard.
+- `DWIS.DAQBridge.BaseStar.BlackboardSink` - Blackboard sink to read signals back from the DWIS Blackboard.
 - `DWIS.DAQBridge.BaseStar.Server` - Runtime bridge that connects OPC-UA data to the DWIS Blackboard.
 - `DWIS.DAQBridge.BaseStar.Schemas` - Shared schemas supporting signal definitions and exchange.
 

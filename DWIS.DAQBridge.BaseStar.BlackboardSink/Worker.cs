@@ -3,7 +3,7 @@ using DWIS.DAQBridge.BaseStar.Model;
 using DWIS.RigOS.Common.Worker;
 using System.Reflection;
 
-namespace DWIS.DAQBridge.BaseStar.OPCUASink
+namespace DWIS.DAQBridge.BaseStar.BlackboardSink
 {
     public class Worker : DWISWorker<Configuration>
     {

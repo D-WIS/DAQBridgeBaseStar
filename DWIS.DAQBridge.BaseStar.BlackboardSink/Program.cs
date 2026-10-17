@@ -1,4 +1,4 @@
-using DWIS.DAQBridge.BaseStar.OPCUASink;
+using DWIS.DAQBridge.BaseStar.BlackboardSink;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<Worker>();

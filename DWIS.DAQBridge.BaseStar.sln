@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.BaseStar.Ser
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.BaseStar.OPCUASource", "DWIS.DAQBridge.BaseStar.OPCUASource\DWIS.DAQBridge.BaseStar.OPCUASource.csproj", "{E2805150-0002-466E-B88E-17E564318F9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.BaseStar.OPCUASink", "DWIS.DAQBridge.BaseStar.OPCUASink\DWIS.DAQBridge.BaseStar.OPCUASink.csproj", "{C90DF793-5D5A-4A95-A4F7-C7F79246344E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.BaseStar.BlackboardSink", "DWIS.DAQBridge.BaseStar.BlackboardSink\DWIS.DAQBridge.BaseStar.BlackboardSink.csproj", "{C90DF793-5D5A-4A95-A4F7-C7F79246344E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DWIS.DAQBridge.BaseStar.ExportDataStructures", "DWIS.DAQBridge.BaseStar.ExportDataStructures\DWIS.DAQBridge.BaseStar.ExportDataStructures.csproj", "{8957B1BB-26CA-4027-88DD-5A4592491D13}"
 EndProject

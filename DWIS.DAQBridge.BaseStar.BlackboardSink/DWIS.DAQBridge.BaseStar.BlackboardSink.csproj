@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Preserve the existing development secret-store identity across the project rename. -->
     <UserSecretsId>dotnet-DWIS.DAQBridge.BaseStar.OPCUASink-4e58bd3d-dc2b-42fa-9bb8-1f50a327340f</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <Authors>Eric Cayeux</Authors>

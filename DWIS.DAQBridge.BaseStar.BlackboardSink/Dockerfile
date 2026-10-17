@@ -11,20 +11,21 @@ RUN chmod -R 755 /app/config
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["DWIS.DAQBridge.BaseStar.OPCUASink/config/Quickstarts.ReferenceClient.Config.xml", "/app/config/"]
-COPY ["DWIS.DAQBridge.BaseStar.OPCUASink/DWIS.DAQBridge.BaseStar.OPCUASink.csproj", "DWIS.DAQBridge.BaseStar.OPCUASink/"]
-RUN dotnet restore "./DWIS.DAQBridge.BaseStar.OPCUASink/DWIS.DAQBridge.BaseStar.OPCUASink.csproj"
+COPY ["DWIS.DAQBridge.BaseStar.BlackboardSink/config/Quickstarts.ReferenceClient.Config.xml", "/app/config/"]
+COPY ["DWIS.DAQBridge.BaseStar.BlackboardSink/DWIS.DAQBridge.BaseStar.BlackboardSink.csproj", "DWIS.DAQBridge.BaseStar.BlackboardSink/"]
+COPY ["DWIS.DAQBridge.BaseStar.Model/DWIS.DAQBridge.BaseStar.Model.csproj", "DWIS.DAQBridge.BaseStar.Model/"]
+RUN dotnet restore "./DWIS.DAQBridge.BaseStar.BlackboardSink/DWIS.DAQBridge.BaseStar.BlackboardSink.csproj"
 COPY . .
-WORKDIR "/src/DWIS.DAQBridge.BaseStar.OPCUASink"
-RUN dotnet build "./DWIS.DAQBridge.BaseStar.OPCUASink.csproj" -c Release -o /app
+WORKDIR "/src/DWIS.DAQBridge.BaseStar.BlackboardSink"
+RUN dotnet build "./DWIS.DAQBridge.BaseStar.BlackboardSink.csproj" -c Release -o /app
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
-RUN dotnet publish "./DWIS.DAQBridge.BaseStar.OPCUASink.csproj" -c Release -o /app
+RUN dotnet publish "./DWIS.DAQBridge.BaseStar.BlackboardSink.csproj" -c Release -o /app
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 VOLUME /home
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "DWIS.DAQBridge.BaseStar.OPCUASink.dll"]
+ENTRYPOINT ["dotnet", "DWIS.DAQBridge.BaseStar.BlackboardSink.dll"]

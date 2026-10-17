@@ -1,4 +1,4 @@
-# Helper Program to Read from the DWIS Blackboard Signals Transferred from the Base Star Mechanical Sub
+# BaseStar Blackboard Sink
 This project provides DWIS Blackboard sink that reads Base Star mechanical sub signals after they have been published to the D-WIS Blackboard.
 
 ## Purpose
@@ -16,3 +16,8 @@ This project provides DWIS Blackboard sink that reads Base Star mechanical sub s
 - When diagnosing signal mapping or data quality issues.
 - As a lightweight consumer for Base Star signal verification.
 
+
+## Run
+From the solution directory, run
+`dotnet run --project DWIS.DAQBridge.BaseStar.BlackboardSink/DWIS.DAQBridge.BaseStar.BlackboardSink.csproj`.
+The project, assembly, and namespace are `DWIS.DAQBridge.BaseStar.BlackboardSink`.
