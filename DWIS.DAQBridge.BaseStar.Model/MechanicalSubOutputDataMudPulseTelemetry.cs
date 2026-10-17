@@ -300,7 +300,7 @@ namespace DWIS.DAQBridge.BaseStar.Model
         [SemanticFact("BaseStarMeasuredMaxRawWeight#01", Verbs.Enum.IsProvidedBy, "Halliburton#01")]
         [SemanticFact("BaseStarMeasuredRawWeight#01", Verbs.Enum.IsProvidedBy, "Halliburton#01")]
         [OPCUANode("http://ddhub.no/BaseStarDataManifest/Variables/", "BaseStarDataManifest.", "MaxRawWeight")]
-        public GaussianDrillingProperty? MaxRawWeight { get; set; } = null;
+        public ScalarProperty? MaxRawWeight { get; set; } = null;
 
         [AccessToVariable(CommonProperty.VariableAccessType.Assignable)]
         [Mandatory(CommonProperty.MandatoryType.General)]

@@ -9,6 +9,8 @@ namespace DWIS.DAQBridge.BaseStar.Server
 {
     public class ConfigurationForBaseStar : ConfigurationForOPCUA
     {
+        public TimeSpan ConnectionRetryInterval { get; set; } = TimeSpan.FromSeconds(5);
+
         public bool InitializeInputOPCUAVariables { get; set; } = false;
     }
 }
