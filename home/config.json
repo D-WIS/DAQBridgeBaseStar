@@ -11,5 +11,9 @@
   "DataLogDirectory": "/home",
   "DataLogSegmentDuration": "06:00:00",
   "MaximumDataLogStorageBytes": 1073741824,
-  "EnableBlackboardHistory": true
+  "EnableBlackboardHistory": true,
+  "SimulationSeed": 20261017,
+  "SimulationConditionGenerationPeriod": "00:00:10",
+  "SimulationDataGenerationPeriod": "00:00:30",
+  "SimulationOPCUAPublishPeriod": "00:00:05"
 }

@@ -1,30 +1,25 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+USER root
+RUN mkdir -p /home/pki/basestar-source /home/logs /app/config && chown -R $APP_UID /home /app/config
+USER $APP_UID
 WORKDIR /app
 
-RUN mkdir -p /app/config
-RUN chmod -R 755 /app/config
-
-# This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["DWIS.DAQBridge.BaseStar.OPCUASource/config/Quickstarts.ReferenceClient.Config.xml", "/app/config/"]
 COPY ["DWIS.DAQBridge.BaseStar.OPCUASource/DWIS.DAQBridge.BaseStar.OPCUASource.csproj", "DWIS.DAQBridge.BaseStar.OPCUASource/"]
-RUN dotnet restore "./DWIS.DAQBridge.BaseStar.OPCUASource/DWIS.DAQBridge.BaseStar.OPCUASource.csproj"
+COPY ["DWIS.DAQBridge.BaseStar.Model/DWIS.DAQBridge.BaseStar.Model.csproj", "DWIS.DAQBridge.BaseStar.Model/"]
+RUN dotnet restore "DWIS.DAQBridge.BaseStar.OPCUASource/DWIS.DAQBridge.BaseStar.OPCUASource.csproj"
 COPY . .
 WORKDIR "/src/DWIS.DAQBridge.BaseStar.OPCUASource"
-RUN dotnet build "./DWIS.DAQBridge.BaseStar.OPCUASource.csproj" -c Release -o /app
+RUN dotnet build "DWIS.DAQBridge.BaseStar.OPCUASource.csproj" -c $BUILD_CONFIGURATION --no-restore -o /app/build
 
-# This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
-RUN dotnet publish "./DWIS.DAQBridge.BaseStar.OPCUASource.csproj" -c Release -o /app
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "DWIS.DAQBridge.BaseStar.OPCUASource.csproj" -c $BUILD_CONFIGURATION --no-restore -o /app/publish /p:UseAppHost=false
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
-WORKDIR /app
+COPY --from=publish /app/publish .
+COPY ["DWIS.DAQBridge.BaseStar.OPCUASource/config/Quickstarts.ReferenceClient.Container.Config.xml", "/app/config/Quickstarts.ReferenceClient.Config.xml"]
 VOLUME /home
-COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "DWIS.DAQBridge.BaseStar.OPCUASource.dll"]

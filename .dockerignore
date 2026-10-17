@@ -28,3 +28,5 @@ README.md
 !.git/config
 !.git/packed-refs
 !.git/refs/heads/**
+# Runtime configuration, logs, and OPC-UA state are mounted, not baked into images.
+/home/

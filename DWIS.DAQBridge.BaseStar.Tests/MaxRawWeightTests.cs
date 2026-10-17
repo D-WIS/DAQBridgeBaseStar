@@ -42,6 +42,32 @@ public class MaxRawWeightTests
         Assert.Equal(expected, client.Writes[(InputNamespace, InputID)]);
     }
 
+    [Fact]
+    public async Task SourceConvertsSiToConfiguredWireUnitsInOneBatch()
+    {
+        using var worker = new SourceWorker();
+        var client = worker.SetClient();
+        worker.Configuration = new ConfigurationForBaseStarSimulation
+        {
+            UnitConversions = new() { [InputID] = new() { ConversionFactor = 2, ConversionOffset = 2 } }
+        };
+        var data = new MechanicalSubOutputDataMudPulseTelemetry { MaxRawWeight = new ScalarProperty { Value = 12345.5 } };
+        await worker.Publish(data);
+        Assert.Equal(24693, client.Writes[(InputNamespace, InputID)]);
+        Assert.Equal(12345.5, data.MaxRawWeight.Value);
+        Assert.Equal(1, client.WriteCalls);
+    }
+
+    [Fact]
+    public async Task SourceRejectsFailedWrites()
+    {
+        using var worker = new SourceWorker();
+        var client = worker.SetClient();
+        client.Reject = true;
+        await Assert.ThrowsAsync<InvalidOperationException>(() => worker.Publish(
+            new MechanicalSubOutputDataMudPulseTelemetry { MaxRawWeight = new ScalarProperty { Value = 1 } }));
+    }
+
     [Theory]
     [InlineData(12345.5, 1, 0, 12345.5)]
     [InlineData(24693, 2, 2, 12345.5)]
@@ -66,7 +92,7 @@ public class MaxRawWeightTests
 
     private sealed class SourceWorker : DWIS.DAQBridge.BaseStar.OPCUASource.Worker
     {
-        public SourceWorker() : base(NullLogger<IDWISWorker<ConfigurationForOPCUA>>.Instance, null) { }
+        public SourceWorker() : base(NullLogger<IDWISWorker<ConfigurationForBaseStarSimulation>>.Instance, null) { }
         public ClientStub SetClient()
         {
             _OPCUAClient = DispatchProxy.Create<IOPCUADWISClient, ClientStub>();
@@ -100,6 +126,8 @@ public class MaxRawWeightTests
     public class ClientStub : DispatchProxy
     {
         public double Input { get; set; }
+        public int WriteCalls { get; private set; }
+        public bool Reject { get; set; }
         public Dictionary<(string Namespace, string ID), double> Writes { get; } = new();
         protected override object? Invoke(MethodInfo? method, object?[]? args)
         {
@@ -107,6 +135,8 @@ public class MaxRawWeightTests
             {
                 case "get_Connected": return true;
                 case "UpdateAnyVariables":
+                    WriteCalls++;
+                    if (Reject) return false;
                     foreach (var (ns, id, value, timestamp) in ((string, string, object, DateTime)[])args![0]!)
                         Writes[(ns, id)] = Assert.IsType<double>(value);
                     return true;

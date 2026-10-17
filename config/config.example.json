@@ -1,0 +1,19 @@
+{
+  "OPCUAURL": "opc.tcp://localhost:48031",
+  "OPCUALoopDuration": "00:00:01",
+  "NameSpace": null,
+  "NodeIDPrefix": null,
+  "OPCUAIDs": null,
+  "UnitConversions": null,
+  "LoopDuration": "00:00:01",
+  "GeneralBlackboard": "opc.tcp://localhost:48030",
+  "EnableDataLogging": true,
+  "DataLogDirectory": "/home",
+  "DataLogSegmentDuration": "06:00:00",
+  "MaximumDataLogStorageBytes": 1073741824,
+  "EnableBlackboardHistory": true,
+  "SimulationSeed": 20261017,
+  "SimulationConditionGenerationPeriod": "00:00:10",
+  "SimulationDataGenerationPeriod": "00:00:30",
+  "SimulationOPCUAPublishPeriod": "00:00:05"
+}

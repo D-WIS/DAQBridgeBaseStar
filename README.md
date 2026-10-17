@@ -167,3 +167,31 @@ the runtime contract.
 Live recovery can be checked with isolated OPC-UA and Blackboard instances by starting
 the Server before either dependency, then stopping and restarting each dependency while
 observing retry and resumed-exchange messages.
+
+## Reproducible simulator and container releases
+The OPCUASource now generates plausible scalar SI samples with a configurable seed
+and independent schedules: conditions every 10 seconds, mechanical/dynamic data every
+30 seconds, and unchanged OPC-UA republishes every 5 seconds. Settings are
+`SimulationSeed`, `SimulationConditionGenerationPeriod`,
+`SimulationDataGenerationPeriod`, and `SimulationOPCUAPublishPeriod`; restart the
+simulator after editing them. See `config/config.example.json` and the OPCUASource
+README for signal conventions and limitations. Generation is reproducible across
+polling cadences and skipped polls. Republishing unchanged values exercises the
+Server's change detection. These synthetic values are not vendor calibration.
+
+Both Dockerfiles build from the solution root and restore their Model dependency
+explicitly. They run as the .NET non-root user (UID 1654). Mount a persistent, writable
+`/home` volume, and place `config.json` there; for a bind mount, grant UID 1654 access.
+Do not change or delete existing persisted data when granting access. Runtime files
+are excluded from the image build context. Container-specific OPC-UA configuration
+stores logs under `/home/logs` and certificate/cache state under
+`/home/pki/basestar-server` or `/home/pki/basestar-source`; unsecured connections may
+not create certificate stores until needed. Local development XML remains separate.
+
+`.github/workflows/docker-build-push.yml` runs on main pushes or manual dispatch.
+It restores, builds and tests the solution in Release before publishing both images:
+`digiwells/dwisdaqbridgebasestarserver` and
+`digiwells/dwisdaqbridgebasestaropcuasource`. Each receives `stable` and
+`sha-<full commit SHA>` tags. Existing `DOCKERHUB_USERNAME` and `DOCKERHUB_PASSWORD`
+repository secrets are required. The workflow publishes images; deployment is separate.
+Use the immutable SHA tag when reproducibility is required.

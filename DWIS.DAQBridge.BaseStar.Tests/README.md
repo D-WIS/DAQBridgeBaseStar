@@ -17,3 +17,8 @@ explicit timestamps rather than waiting in wall-clock time.
 maximum-bit-torque input lineage, stable provider identity, and exact agreement of
 all 26 exported manifests and SPARQL files with the model's runtime contracts.
 Regenerate artifacts using the root README instructions before running these tests.
+
+`SimulatorTests` checks seed reproducibility, independent generation/publication,
+missed-poll behavior, invalid-period defaults and coherent finite SI values across
+an hour of simulated time. `MaxRawWeightTests` also checks batched source writes,
+SI-to-wire conversion without mutating the simulation, and rejected writes.
