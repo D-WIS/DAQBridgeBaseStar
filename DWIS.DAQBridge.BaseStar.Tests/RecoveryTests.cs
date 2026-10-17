@@ -111,7 +111,7 @@ public class RecoveryTests
         public bool FailRead { get; set; }
         public TestWorker() : base(NullLogger<IDWISWorker<ConfigurationForBaseStar>>.Instance, null)
         {
-            Configuration = new ConfigurationForBaseStar();
+            Configuration = new ConfigurationForBaseStar { EnableDataLogging = false, EnableBlackboardHistory = false };
         }
         public ClientStub SetClients(bool opcConnected, bool blackboardConnected, out ClientStub blackboard)
         {
@@ -134,6 +134,7 @@ public class RecoveryTests
             Dictionary<string, string>? ids, Dictionary<string, UnitConversion>? conversions)
         {
             Reads++;
+            ((DWIS.DAQBridge.BaseStar.Model.MechanicalSubOutputDataMudPulseTelemetry)data!).AnnulusPressure = new ScalarProperty { Value = 1 };
             if (DisconnectDuringRead) ((ClientStub)_OPCUAClient!).Connected = false;
             if (FailRead) throw new InvalidOperationException("Simulated transport failure");
             return Task.CompletedTask;

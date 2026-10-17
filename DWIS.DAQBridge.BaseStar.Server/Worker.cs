@@ -1,7 +1,6 @@
 using DWIS.Client.ReferenceImplementation;
 using DWIS.Client.ReferenceImplementation.OPCFoundation;
 using DWIS.RigOS.Common.Worker;
-using OSDC.DotnetLibraries.General.Common;
 using DWIS.DAQBridge.BaseStar.Model;
 
 namespace DWIS.DAQBridge.BaseStar.Server
@@ -9,6 +8,17 @@ namespace DWIS.DAQBridge.BaseStar.Server
     public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStar>
     {
         private MechanicalSubOutputDataMudPulseTelemetry MechanicalSubData { get; set; } = new MechanicalSubOutputDataMudPulseTelemetry();
+
+        private BaseStarSnapshot? _lastPublished;
+        private BaseStarSnapshot? _lastRawFile;
+        private BaseStarSnapshot? _lastPublishedFile;
+        private BaseStarSnapshot? _lastRawHistory;
+        private BaseStarSnapshot? _lastPublishedHistory;
+        private BaseStarDataLogWriter? _dataLogWriter;
+        private string? _dataLogSettingsKey;
+        private readonly BaseStarBlackboardHistoryPublisher _historyPublisher = new();
+        private bool _historyInitialized;
+        private IOPCUADWISClient? _historyClient;
 
         private bool _opcConnectionNeedsRecovery;
         private bool _blackboardConnectionNeedsRecovery;
@@ -25,8 +35,18 @@ namespace DWIS.DAQBridge.BaseStar.Server
             {
                 ConfigurationUpdater<ConfigurationForBaseStar>.Instance.UpdateConfiguration(this);
 
+                await MaintainFilesAsync(DateTimeOffset.UtcNow);
+
                 if (!TryEstablishConnections())
                 {
+                    // History still expires when the source is offline but the Blackboard is reachable.
+                    try { MaintainBlackboardHistory(DateTimeOffset.UtcNow); }
+                    catch (Exception ex)
+                    {
+                        Logger?.LogWarning(ex, "Could not maintain BaseStar history while reconnecting.");
+                        _blackboardConnectionNeedsRecovery = true;
+                        _historyInitialized = false;
+                    }
                     await WaitBeforeReconnectAsync(stoppingToken);
                     continue;
                 }
@@ -157,6 +177,10 @@ namespace DWIS.DAQBridge.BaseStar.Server
             // Targets belong to the current Blackboard session and must be resolved again.
             PlaceHolders.Clear();
             await RegisterToBlackboard(MechanicalSubData);
+            // Re-synchronize live values once for the new session, but keep change-only file logs.
+            _lastPublished = null;
+            _historyInitialized = false;
+            EnsureHistoryInitialized(DateTimeOffset.UtcNow);
         }
 
         private async Task WaitBeforeReconnectAsync(CancellationToken stoppingToken)
@@ -178,17 +202,7 @@ namespace DWIS.DAQBridge.BaseStar.Server
         protected override async Task Loop(CancellationToken stoppingToken)
         {
             using PeriodicTimer timer = new PeriodicTimer(OPCUALoopSpan);
-            double opcDuration = OPCUALoopSpan.TotalSeconds;
-            double dwisDuration = LoopSpan.TotalSeconds;
-            int count = 1;
-            if (!Numeric.EQ(opcDuration, 0))
-            {
-                count = (int)(dwisDuration / opcDuration);
-            }
-            if (count <= 0)
-            {
-                count = 1;
-            }
+            int count = Math.Max(1, (int)(LoopSpan.TotalSeconds / OPCUALoopSpan.TotalSeconds));
             int k = 0;
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
@@ -204,24 +218,9 @@ namespace DWIS.DAQBridge.BaseStar.Server
                         return;
                     }
                     k++;
-                    if (k == count)
-                    {
-                        await PublishBlackboardAsync(MechanicalSubData, stoppingToken);
-                        if (!ConnectionsAreEstablished)
-                        {
-                            return;
-                        }
-                        lock (_lock)
-                        {
-                            if (Logger is not null && Logger.IsEnabled(LogLevel.Information) &&
-                                MechanicalSubData.AnnulusPressure is not null &&
-                                MechanicalSubData.AnnulusPressure.Value is not null)
-                            {
-                                Logger.LogInformation("Mechanical Sub Annulus Pressure: " + MechanicalSubData.AnnulusPressure.Value.Value.ToString("F3"));
-                            }
-                        }
-                        k = 0;
-                    }
+                    bool publishDue = k >= count;
+                    if (publishDue) k = 0;
+                    await ProcessSampleAsync(MechanicalSubData, DateTimeOffset.UtcNow, publishDue, stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
@@ -236,6 +235,114 @@ namespace DWIS.DAQBridge.BaseStar.Server
                     return;
                 }
                 ConfigurationUpdater<ConfigurationForBaseStar>.Instance.UpdateConfiguration(this);
+            }
+        }
+
+        private void EnsureHistoryInitialized(DateTimeOffset nowUtc)
+        {
+            if (Configuration?.EnableBlackboardHistory != true)
+            {
+                _historyInitialized = false;
+                return;
+            }
+            if (_historyInitialized && ReferenceEquals(_historyClient, _DWISClient)) return;
+            _historyPublisher.Initialize(_DWISClient!, nowUtc);
+            _lastRawHistory = _historyPublisher.Latest(BaseStarHistoryDataKind.Raw);
+            _lastPublishedHistory = _historyPublisher.Latest(BaseStarHistoryDataKind.Published);
+            _historyClient = _DWISClient;
+            _historyInitialized = true;
+        }
+
+        protected void MaintainBlackboardHistory(DateTimeOffset nowUtc)
+        {
+            if (_DWISClient?.Connected != true) return;
+            EnsureHistoryInitialized(nowUtc);
+            if (_historyInitialized) _historyPublisher.Maintain(nowUtc);
+        }
+
+        protected async Task ProcessSampleAsync(MechanicalSubOutputDataMudPulseTelemetry data,
+            DateTimeOffset timestampUtc, bool publishDue, CancellationToken stoppingToken)
+        {
+            await MaintainFilesAsync(timestampUtc);
+            MaintainBlackboardHistory(timestampUtc);
+            BaseStarSnapshot snapshot = BaseStarSnapshot.Capture(data);
+            if (!snapshot.HasValues) return;
+
+            if (!snapshot.Equals(_lastRawFile) && await TryLogAsync(BaseStarHistoryDataKind.Raw, timestampUtc, snapshot))
+                _lastRawFile = snapshot;
+            if (_historyInitialized && !snapshot.Equals(_lastRawHistory))
+            {
+                _historyPublisher.Append(BaseStarHistoryDataKind.Raw, timestampUtc, snapshot.ToEntry(timestampUtc));
+                _lastRawHistory = snapshot;
+            }
+
+            if (publishDue && snapshot.ChangesFrom(_lastPublished).Any())
+            {
+                await PublishBlackboardAsync(data, stoppingToken);
+                if (!ConnectionsAreEstablished) return;
+                _lastPublished = snapshot;
+            }
+            if (_lastPublished is null) return;
+            if (!_lastPublished.Equals(_lastPublishedFile) &&
+                await TryLogAsync(BaseStarHistoryDataKind.Published, timestampUtc, _lastPublished))
+                _lastPublishedFile = _lastPublished;
+            if (_historyInitialized && !_lastPublished.Equals(_lastPublishedHistory))
+            {
+                _historyPublisher.Append(BaseStarHistoryDataKind.Published, timestampUtc, _lastPublished.ToEntry(timestampUtc));
+                _lastPublishedHistory = _lastPublished;
+            }
+        }
+
+        protected override async Task PublishBlackboardAsync(DWISData data, CancellationToken stoppingToken)
+        {
+            BaseStarSnapshot snapshot = BaseStarSnapshot.Capture(data);
+            foreach (int index in snapshot.ChangesFrom(_lastPublished))
+            {
+                stoppingToken.ThrowIfCancellationRequested();
+                var property = BaseStarSnapshot.Properties[index];
+                if (!PlaceHolders.TryGetValue(property, out var targets) || !SendValue(targets, snapshot[index]))
+                    throw new InvalidOperationException($"Could not publish BaseStar signal '{property.Name}'.");
+                await Task.Yield();
+            }
+            _lastPublished = snapshot;
+        }
+
+        private BaseStarDataLogWriter? GetDataLogWriter()
+        {
+            if (Configuration?.EnableDataLogging != true) return null;
+            string settings = $"{Configuration.DataLogDirectory}|{Configuration.DataLogSegmentDuration.Ticks}|{Configuration.MaximumDataLogStorageBytes}";
+            if (_dataLogWriter is null || settings != _dataLogSettingsKey)
+            {
+                _dataLogWriter = new(Configuration.DataLogDirectory, Configuration.DataLogSegmentDuration,
+                    Configuration.MaximumDataLogStorageBytes);
+                _dataLogSettingsKey = settings;
+                _lastRawFile = null;
+                _lastPublishedFile = null;
+            }
+            return _dataLogWriter;
+        }
+        private async Task MaintainFilesAsync(DateTimeOffset nowUtc)
+        {
+            try
+            {
+                var writer = GetDataLogWriter();
+                if (writer is not null) await writer.MaintainAsync(nowUtc);
+            }
+            catch (Exception ex) { Logger?.LogError(ex, "Could not maintain the compact BaseStar data logs."); }
+        }
+        private async Task<bool> TryLogAsync(BaseStarHistoryDataKind kind, DateTimeOffset timestampUtc, BaseStarSnapshot snapshot)
+        {
+            try
+            {
+                var writer = GetDataLogWriter();
+                if (writer is null) return false;
+                await writer.AppendAsync(kind, timestampUtc, snapshot.ToEntry(timestampUtc));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogError(ex, "Could not append the compact BaseStar {Kind} data log.", kind);
+                return false;
             }
         }
     }
