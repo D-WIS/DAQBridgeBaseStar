@@ -1,0 +1,29 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarAverageRotationalSpeed
+WHERE {
+	?BaseStarAverageRotationalSpeed_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarAverageRotationalSpeed_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarAverageRotationalSpeed_01 ddhub:HasDynamicValue ?BaseStarAverageRotationalSpeed .
+	?BaseStarAverageRotationalSpeed_01 ddhub:IsOfMeasurableQuantity quantity:angularVelocityDrilling .
+	?MovingAverageBaseStarAverageRotationalSpeed rdf:type ddhub:MovingAverage .
+	?BaseStarAverageRotationalSpeed_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarAverageRotationalSpeed .
+	?BaseStarRotationalSpeed_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarRotationalSpeed_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarRotationalSpeed_01 ddhub:HasDynamicValue ?BaseStarRotationalSpeed .
+	?BaseStarRotationalSpeed_01 ddhub:IsOfMeasurableQuantity quantity:angularVelocityDrilling .
+	?BaseStarRotationalSpeed_01 ddhub:IsTransformationInput ?MovingAverageBaseStarAverageRotationalSpeed .
+	?GaussianUncertaintyBaseStarAverageRotationalSpeed_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarAverageRotationalSpeed_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarAverageRotationalSpeed_01 .
+	?GaussianUncertaintyBaseStarAverageRotationalSpeed_01 ddhub:HasUncertaintyMean ?BaseStarAverageRotationalSpeed_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarAverageRotationalSpeed_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarAverageRotationalSpeed_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?BaseStarRotationalSpeed_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarAverageRotationalSpeed_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarRotationalSpeed_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

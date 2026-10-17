@@ -1,0 +1,32 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredMaxBitTorque
+WHERE {
+	?BaseStarMeasuredMaxBitTorque_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMaxBitTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMaxBitTorque_01 ddhub:HasDynamicValue ?BaseStarMeasuredMaxBitTorque .
+	?BaseStarMeasuredMaxBitTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?MovingMaxBaseStarMeasuredMaxBitTorque rdf:type ddhub:MovingMax .
+	?BaseStarMeasuredMaxBitTorque_01 ddhub:IsTransformationOutput ?MovingMaxBaseStarMeasuredMaxBitTorque .
+	?taringTransformationMaxBitTorque rdf:type ddhub:SummationTransformation .
+	?BaseStarMeasuredMaxRawTorque_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMaxRawTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMaxRawTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?BaseStarMeasuredMaxRawTorque_01 ddhub:IsTransformationInput ?taringTransformationMaxBitTorque .
+	?TorqueBiasForMudPulseTelemetry_01 rdf:type ddhub:ProcessData .
+	?TorqueBiasForMudPulseTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TorqueBiasForMudPulseTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?TorqueBiasForMudPulseTelemetry_01 ddhub:IsTransformationInput ?taringTransformationMaxBitTorque .
+	?BaseStarMeasuredMaxBitTorque_01 ddhub:IsTransformationOutput ?taringTransformationMaxBitTorque .
+	?GaussianUncertaintyBaseStarMeasuredMaxBitTorque_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredMaxBitTorque_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredMaxBitTorque_01 .
+	?GaussianUncertaintyBaseStarMeasuredMaxBitTorque_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredMaxBitTorque_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredMaxBitTorque_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?Bit_01 rdf:type ddhub:EndOfStringMechanicalLogicalElement .
+	?BaseStarMeasuredMaxBitTorque_01 ddhub:IsMechanicallyLocatedAt ?Bit_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredMaxBitTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

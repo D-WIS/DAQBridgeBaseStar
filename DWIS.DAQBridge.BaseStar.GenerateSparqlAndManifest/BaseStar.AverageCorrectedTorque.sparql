@@ -1,0 +1,32 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredAverageCorrectedTorque
+WHERE {
+	?BaseStarMeasuredAverageCorrectedTorque_01 rdf:type ddhub:CorrectedMeasurement .
+	?BaseStarMeasuredAverageCorrectedTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageCorrectedTorque_01 ddhub:HasDynamicValue ?BaseStarMeasuredAverageCorrectedTorque .
+	?BaseStarMeasuredAverageCorrectedTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?MovingAverageBaseStarMeasuredAverageCorrectedTorque rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredAverageCorrectedTorque_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredAverageCorrectedTorque .
+	?taringTransformationAverageTorque rdf:type ddhub:SummationTransformation .
+	?BaseStarMeasuredAverageRawTorque_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAverageRawTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:IsTransformationInput ?taringTransformationAverageTorque .
+	?TorqueBiasForMudPulseTelemetry_01 rdf:type ddhub:ProcessData .
+	?TorqueBiasForMudPulseTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TorqueBiasForMudPulseTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?TorqueBiasForMudPulseTelemetry_01 ddhub:IsTransformationInput ?taringTransformationAverageTorque .
+	?BaseStarMeasuredAverageCorrectedTorque_01 ddhub:IsTransformationOutput ?taringTransformationAverageTorque .
+	?GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorque_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredAverageCorrectedTorque_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorque_01 .
+	?GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorque_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredAverageCorrectedTorque_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredAverageCorrectedTorque_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredAverageCorrectedTorque_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredAverageCorrectedTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

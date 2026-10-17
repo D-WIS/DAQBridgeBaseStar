@@ -1,0 +1,32 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredAverageBitWeight
+WHERE {
+	?BaseStarMeasuredAverageBitWeight_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAverageBitWeight_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageBitWeight_01 ddhub:HasDynamicValue ?BaseStarMeasuredAverageBitWeight .
+	?BaseStarMeasuredAverageBitWeight_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?MovingAverageBaseStarMeasuredAverageBitWeight rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredAverageBitWeight_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredAverageBitWeight .
+	?taringTransformationAverageWOB rdf:type ddhub:SummationTransformation .
+	?BaseStarMeasuredAverageRawWeight_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAverageRawWeight_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:IsTransformationInput ?taringTransformationAverageWOB .
+	?TareBitWeightForMudPulseTelemetry_01 rdf:type ddhub:ProcessData .
+	?TareBitWeightForMudPulseTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsTransformationInput ?taringTransformationAverageWOB .
+	?BaseStarMeasuredAverageBitWeight_01 ddhub:IsTransformationOutput ?taringTransformationAverageWOB .
+	?GaussianUncertaintyBaseStarMeasuredAverageBitWeight_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredAverageBitWeight_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredAverageBitWeight_01 .
+	?GaussianUncertaintyBaseStarMeasuredAverageBitWeight_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredAverageBitWeight_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredAverageBitWeight_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?Bit_01 rdf:type ddhub:EndOfStringMechanicalLogicalElement .
+	?BaseStarMeasuredAverageBitWeight_01 ddhub:IsMechanicallyLocatedAt ?Bit_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredAverageBitWeight_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

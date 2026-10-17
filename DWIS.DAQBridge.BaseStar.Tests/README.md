@@ -12,3 +12,8 @@ raw/published logging, UTC rotation, ZIP archives, storage quotas, safe file own
 late appends, history restoration and expiration during idle periods, failed-write
 retries, and continued publication when file logging fails. The 48-hour tests use
 explicit timestamps rather than waiting in wall-clock time.
+
+`SemanticContractTests` checks consistent raw rotational-speed classification,
+maximum-bit-torque input lineage, stable provider identity, and exact agreement of
+all 26 exported manifests and SPARQL files with the model's runtime contracts.
+Regenerate artifacts using the root README instructions before running these tests.

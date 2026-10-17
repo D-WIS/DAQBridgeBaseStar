@@ -1,0 +1,31 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarStickSlipIndicator
+WHERE {
+	?BaseStarStickSlipIndicator_01 rdf:type ddhub:ComputedData .
+	?BaseStarStickSlipIndicator_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarStickSlipIndicator_01 ddhub:HasDynamicValue ?BaseStarStickSlipIndicator .
+	?BaseStarStickSlipIndicator_01 ddhub:IsOfMeasurableQuantity quantity:dimensionLessStandard .
+	?StickSlipIndicatorComputation rdf:type ddhub:Estimator .
+	?BaseStarStickSlipIndicator_01 ddhub:IsTransformationOutput ?StickSlipIndicatorComputation .
+	?BaseStarRotationalSpeed_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarRotationalSpeed_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarRotationalSpeed_01 ddhub:HasDynamicValue ?BaseStarRotationalSpeed .
+	?BaseStarRotationalSpeed_01 ddhub:IsOfMeasurableQuantity quantity:angularVelocityDrilling .
+	?BaseStarRotationalSpeed_01 ddhub:IsTransformationInput ?StickSlipIndicatorComputation .
+	?GaussianUncertaintyBaseStarStickSlipIndicator_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarStickSlipIndicator_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarStickSlipIndicator_01 .
+	?GaussianUncertaintyBaseStarStickSlipIndicator_01 ddhub:HasUncertaintyMean ?BaseStarStickSlipIndicator_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarStickSlipIndicator_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?stickSlipIncident rdf:type ddhub:StickSlip .
+	?BaseStarStickSlipIndicator_01 ddhub:IsRelatedToDrillingIncident ?stickSlipIncident .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarStickSlipIndicator_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?BaseStarRotationalSpeed_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarStickSlipIndicator_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarRotationalSpeed_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

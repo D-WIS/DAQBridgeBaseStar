@@ -1,0 +1,29 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredMinRawTorque
+WHERE {
+	?BaseStarMeasuredMinRawTorque_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMinRawTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:HasDynamicValue ?BaseStarMeasuredMinRawTorque .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?MovingMinBaseStarMeasuredMinRawTorque rdf:type ddhub:MovingMin .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:IsTransformationOutput ?MovingMinBaseStarMeasuredMinRawTorque .
+	?BaseStarMeasuredRawTorque_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredRawTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredRawTorque_01 ddhub:HasDynamicValue ?BaseStarMeasuredRawTorque .
+	?BaseStarMeasuredRawTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?BaseStarMeasuredRawTorque_01 ddhub:IsTransformationInput ?MovingMinBaseStarMeasuredMinRawTorque .
+	?GaussianUncertaintyBaseStarMeasuredMinRawTorque_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredMinRawTorque_01 .
+	?GaussianUncertaintyBaseStarMeasuredMinRawTorque_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredMinRawTorque_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?BaseStarMeasuredRawTorque_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarMeasuredRawTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

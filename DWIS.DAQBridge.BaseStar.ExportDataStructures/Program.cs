@@ -1,45 +1,32 @@
-﻿using DWIS.DAQBridge.BaseStar.Model;
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-namespace DWIS.DAQBridge.BaseStar.ExportDataStructures
-{
-    class Program
-    {
-        static void Main()
-        {
-            GenerateManifests();
-        }
+using DWIS.DAQBridge.BaseStar.Model;
 
-        static void GenerateManifests()
+namespace DWIS.DAQBridge.BaseStar.ExportDataStructures;
+
+internal static class Program
+{
+    private static void Main(string[] args)
+    {
+        if (args.Length > 1) throw new ArgumentException("Usage: ExportDataStructures [output-directory]");
+        string directory = args.Length == 1 ? Path.GetFullPath(args[0]) : FindSchemaDirectory();
+        Directory.CreateDirectory(directory);
+        var data = new MechanicalSubOutputDataMudPulseTelemetry();
+        foreach (var (property, manifest) in data.Manifests.Value)
+            File.WriteAllText(Path.Combine(directory, property.Name + "Manifest.json"),
+                JsonSerializer.Serialize(manifest) + "\n", new UTF8Encoding(false));
+        Console.WriteLine($"Exported {data.Manifests.Value.Count} runtime manifests to {directory}.");
+    }
+
+    private static string FindSchemaDirectory()
+    {
+        DirectoryInfo? directory = new(AppContext.BaseDirectory);
+        while (directory is not null)
         {
-            string rootDir = ".\\";
-            bool found = false;
-            do
-            {
-                DirectoryInfo? info = Directory.GetParent(rootDir);
-                if (info != null && "DWIS.DAQBridge.BaseStar.ExportDataStructures".Equals(info.Name))
-                {
-                    found = true;
-                }
-                else
-                {
-                    rootDir += "..\\";
-                }
-            } while (!found);
-            rootDir += "..\\DWIS.DAQBridge.BaseStar.Schemas\\";
-            MechanicalSubOutputDataMudPulseTelemetry data = new MechanicalSubOutputDataMudPulseTelemetry();
-            if (data.Manifests is not null)
-            {
-                foreach (var kpv in data.Manifests.Value)
-                {
-                    string name = kpv.Key.Name;
-                    using (StreamWriter writer = new StreamWriter(rootDir + name + "Manifest" + ".json"))
-                    {
-                        string json = System.Text.Json.JsonSerializer.Serialize(kpv.Value);
-                        writer.WriteLine(json);
-                    }
-                }
-            }
+            if (File.Exists(Path.Combine(directory.FullName, "DWIS.DAQBridge.BaseStar.ExportDataStructures.csproj")))
+                return Path.GetFullPath(Path.Combine(directory.FullName, "..", "DWIS.DAQBridge.BaseStar.Schemas"));
+            directory = directory.Parent;
         }
+        throw new DirectoryNotFoundException("Specify an output directory when running outside the source tree.");
     }
 }

@@ -1,0 +1,26 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredAnnulusPressure
+WHERE {
+	?BaseStarMeasuredAnnulusPressure_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAnnulusPressure_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAnnulusPressure_01 ddhub:HasDynamicValue ?BaseStarMeasuredAnnulusPressure .
+	?BaseStarMeasuredAnnulusPressure_01 ddhub:IsOfMeasurableQuantity quantity:pressureDrilling .
+	?MovingAverageBaseStarMeasuredAnnulusPressure rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredAnnulusPressure_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredAnnulusPressure .
+	?GaussianUncertaintyBaseStarMeasuredAnnulusPressure_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredAnnulusPressure_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredAnnulusPressure_01 .
+	?GaussianUncertaintyBaseStarMeasuredAnnulusPressure_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredAnnulusPressure_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredAnnulusPressure_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?annulusOutletJunction_01 rdf:type ddhub:AnnulusOutletJunction .
+	?outletHydraulicBranch_01 rdf:type ddhub:HydraulicBranch .
+	?annulusOutletJunction_01 ddhub:HasUpstreamBranch ?outletHydraulicBranch_01 .
+	?BaseStarMeasuredAnnulusPressure_01 ddhub:IsAssociatedToHydraulicBranch ?outletHydraulicBranch_01 .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredAnnulusPressure_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredAnnulusPressure_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

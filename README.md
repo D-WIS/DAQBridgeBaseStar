@@ -122,6 +122,36 @@ successful; partial signal batches can be retried. History is bounded by duratio
 not bytes, so tag payload sizes still depend on the actual change rate. No offline
 sample queue or standalone OPCUASource recovery behavior is added.
 
+## Semantic model and generated contracts
+The annotations in `MechanicalSubOutputDataMudPulseTelemetry` are authoritative.
+The shared raw rotational-speed node is consistently `DerivedMeasurement`, matching
+its established classification in the maximum-speed and stick-slip descriptions.
+Maximum bit torque's correction uses `BaseStarMeasuredMaxRawTorque`, not average
+raw torque. Signal node identities and the scalar double wire contract are unchanged.
+
+Both export tools now consume the same `Manifests` and `SparQLQueries` used by the
+Server and BlackboardSink. Their provider name is `BaseStarDataManifestDWISBridge`.
+Run these commands from the solution directory after an annotation/package change:
+
+```powershell
+dotnet run --project .\DWIS.DAQBridge.BaseStar.GenerateSparqlAndManifest\DWIS.DAQBridge.BaseStar.GenerateSparqlAndManifest.csproj
+dotnet run --project .\DWIS.DAQBridge.BaseStar.ExportDataStructures\DWIS.DAQBridge.BaseStar.ExportDataStructures.csproj
+```
+
+The first regenerates `BaseStar.<signal>.json`, `BaseStar.<signal>.sparql`, and
+`MechanicalSubOutputDataMudPulseTelemetry.md` in its project directory. The second
+regenerates `<signal>Manifest.json` in `DWIS.DAQBridge.BaseStar.Schemas`. Each tool
+also accepts an explicit output directory after `--`. Do not hand-edit generated
+artifacts. The scalar runtime manifests provide one primary double per signal;
+obsolete exported `Sigma_` variables are no longer advertised as current outputs.
+
+Existing Blackboard imports are additive: injecting a corrected manifest does not
+retract an old type, relationship, or unused uncertainty tag. Live verification can
+use a separate provider namespace on the same Blackboard, requiring each query to
+return that provider's expected node and checking the absence of obsolete facts.
+Migrating an already populated graph requires a separately planned, backed-up
+Blackboard maintenance operation; these source fixes do not erase deployed data.
+
 ## Verification
 Run `dotnet build DWIS.DAQBridge.BaseStar.sln` and
 `dotnet test DWIS.DAQBridge.BaseStar.Tests/DWIS.DAQBridge.BaseStar.Tests.csproj`.
@@ -131,7 +161,9 @@ They also check MaxRawWeight source initialization/publication, semantic registr
 input unit conversion, and Blackboard transfer. `DataLoggingTests` covers compact
 serialization, change detection, per-signal publication, rotation/compression,
 storage limits and file ownership, history restoration/expiry, write rejection,
-and continued publication during file logging failures.
+and continued publication during file logging failures. `SemanticContractTests`
+checks the corrected annotations and all 26 exported manifests/query files against
+the runtime contract.
 Live recovery can be checked with isolated OPC-UA and Blackboard instances by starting
 the Server before either dependency, then stopping and restarting each dependency while
 observing retry and resumed-exchange messages.

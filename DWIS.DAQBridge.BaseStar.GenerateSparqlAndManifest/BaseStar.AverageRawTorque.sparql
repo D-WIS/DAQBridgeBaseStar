@@ -1,0 +1,29 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredAverageRawTorque
+WHERE {
+	?BaseStarMeasuredAverageRawTorque_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAverageRawTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:HasDynamicValue ?BaseStarMeasuredAverageRawTorque .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?MovingAverageBaseStarMeasuredAverageRawTorque rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredAverageRawTorque .
+	?BaseStarMeasuredRawTorque_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredRawTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredRawTorque_01 ddhub:HasDynamicValue ?BaseStarMeasuredRawTorque .
+	?BaseStarMeasuredRawTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?BaseStarMeasuredRawTorque_01 ddhub:IsTransformationInput ?MovingAverageBaseStarMeasuredAverageRawTorque .
+	?GaussianUncertaintyBaseStarMeasuredAverageRawTorque_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredAverageRawTorque_01 .
+	?GaussianUncertaintyBaseStarMeasuredAverageRawTorque_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredAverageRawTorque_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?BaseStarMeasuredRawTorque_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredAverageRawTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarMeasuredRawTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

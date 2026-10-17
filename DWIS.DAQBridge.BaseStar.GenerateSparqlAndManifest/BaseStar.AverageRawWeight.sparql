@@ -1,0 +1,29 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredAverageRawWeight
+WHERE {
+	?BaseStarMeasuredAverageRawWeight_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAverageRawWeight_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:HasDynamicValue ?BaseStarMeasuredAverageRawWeight .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?MovingAverageBaseStarMeasuredAverageRawWeight rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredAverageRawWeight .
+	?BaseStarMeasuredRawWeight_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredRawWeight_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredRawWeight_01 ddhub:HasDynamicValue ?BaseStarMeasuredRawWeight .
+	?BaseStarMeasuredRawWeight_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?BaseStarMeasuredRawWeight_01 ddhub:IsTransformationInput ?MovingAverageBaseStarMeasuredAverageRawWeight .
+	?GaussianUncertaintyBaseStarMeasuredAverageRawWeight_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredAverageRawWeight_01 .
+	?GaussianUncertaintyBaseStarMeasuredAverageRawWeight_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredAverageRawWeight_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?BaseStarMeasuredRawWeight_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredAverageRawWeight_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarMeasuredRawWeight_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

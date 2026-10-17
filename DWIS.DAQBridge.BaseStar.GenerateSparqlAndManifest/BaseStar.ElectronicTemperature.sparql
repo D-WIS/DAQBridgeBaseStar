@@ -1,0 +1,30 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredElectronicTemperature
+WHERE {
+	?BaseStarMeasuredElectronicTemperature_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredElectronicTemperature_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:HasDynamicValue ?BaseStarMeasuredElectronicTemperature .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsOfMeasurableQuantity quantity:temperatureDrilling .
+	?MovingAverageBaseStarMeasuredElectronicTemperature rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredElectronicTemperature .
+	?GaussianUncertaintyBaseStarMeasuredElectronicTemperature_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredElectronicTemperature_01 .
+	?GaussianUncertaintyBaseStarMeasuredElectronicTemperature_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredElectronicTemperature_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?topOfStringJunction_01 rdf:type ddhub:TopOfStringJunction .
+	?stringHydraulicBranch_01 rdf:type ddhub:HydraulicBranch .
+	?topOfStringJunction_01 ddhub:HasDownstreamBranch ?stringHydraulicBranch_01 .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsAssociatedToHydraulicBranch ?stringHydraulicBranch_01 .
+	?annulusOutletJunction_01 rdf:type ddhub:AnnulusOutletJunction .
+	?outletHydraulicBranch_01 rdf:type ddhub:HydraulicBranch .
+	?annulusOutletJunction_01 ddhub:HasUpstreamBranch ?outletHydraulicBranch_01 .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsAssociatedToHydraulicBranch ?outletHydraulicBranch_01 .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

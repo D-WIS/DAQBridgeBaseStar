@@ -1,0 +1,29 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarPeakRotationalSpeed
+WHERE {
+	?BaseStarPeakRotationalSpeed_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarPeakRotationalSpeed_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarPeakRotationalSpeed_01 ddhub:HasDynamicValue ?BaseStarPeakRotationalSpeed .
+	?BaseStarPeakRotationalSpeed_01 ddhub:IsOfMeasurableQuantity quantity:angularVelocityDrilling .
+	?MovingMaxBaseStarPeakRotationalSpeed rdf:type ddhub:MovingMax .
+	?BaseStarPeakRotationalSpeed_01 ddhub:IsTransformationOutput ?MovingMaxBaseStarPeakRotationalSpeed .
+	?BaseStarRotationalSpeed_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarRotationalSpeed_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarRotationalSpeed_01 ddhub:HasDynamicValue ?BaseStarRotationalSpeed .
+	?BaseStarRotationalSpeed_01 ddhub:IsOfMeasurableQuantity quantity:angularVelocityDrilling .
+	?BaseStarRotationalSpeed_01 ddhub:IsTransformationInput ?MovingMaxBaseStarPeakRotationalSpeed .
+	?GaussianUncertaintyBaseStarPeakRotationalSpeed_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarPeakRotationalSpeed_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarPeakRotationalSpeed_01 .
+	?GaussianUncertaintyBaseStarPeakRotationalSpeed_01 ddhub:HasUncertaintyMean ?BaseStarPeakRotationalSpeed_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarPeakRotationalSpeed_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarPeakRotationalSpeed_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?BaseStarRotationalSpeed_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarPeakRotationalSpeed_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarRotationalSpeed_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

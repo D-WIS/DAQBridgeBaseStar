@@ -1,0 +1,32 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredMinCorrectedTorque
+WHERE {
+	?BaseStarMeasuredMinCorrectedTorque_01 rdf:type ddhub:CorrectedMeasurement .
+	?BaseStarMeasuredMinCorrectedTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMinCorrectedTorque_01 ddhub:HasDynamicValue ?BaseStarMeasuredMinCorrectedTorque .
+	?BaseStarMeasuredMinCorrectedTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?MovingMinBaseStarMeasuredMinCorrectedTorque rdf:type ddhub:MovingMin .
+	?BaseStarMeasuredMinCorrectedTorque_01 ddhub:IsTransformationOutput ?MovingMinBaseStarMeasuredMinCorrectedTorque .
+	?taringTransformationMinTorque rdf:type ddhub:SummationTransformation .
+	?BaseStarMeasuredMinRawTorque_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMinRawTorque_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?BaseStarMeasuredMinRawTorque_01 ddhub:IsTransformationInput ?taringTransformationMinTorque .
+	?TorqueBiasForMudPulseTelemetry_01 rdf:type ddhub:ProcessData .
+	?TorqueBiasForMudPulseTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TorqueBiasForMudPulseTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?TorqueBiasForMudPulseTelemetry_01 ddhub:IsTransformationInput ?taringTransformationMinTorque .
+	?BaseStarMeasuredMinCorrectedTorque_01 ddhub:IsTransformationOutput ?taringTransformationMinTorque .
+	?GaussianUncertaintyBaseStarMeasuredMinCorrectedTorque_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredMinCorrectedTorque_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredMinCorrectedTorque_01 .
+	?GaussianUncertaintyBaseStarMeasuredMinCorrectedTorque_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredMinCorrectedTorque_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredMinCorrectedTorque_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredMinCorrectedTorque_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredMinCorrectedTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

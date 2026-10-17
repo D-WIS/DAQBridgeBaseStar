@@ -1,0 +1,32 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredPeakRadialAcceleration
+WHERE {
+	?BaseStarMeasuredPeakRadialAcceleration_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredPeakRadialAcceleration_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:HasDynamicValue ?BaseStarMeasuredPeakRadialAcceleration .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsOfMeasurableQuantity quantity:accelerationDrilling .
+	?MovingMaxBaseStarMeasuredPeakRadialAcceleration rdf:type ddhub:MovingMax .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsTransformationOutput ?MovingMaxBaseStarMeasuredPeakRadialAcceleration .
+	?BaseStarMeasuredRadialAcceleration_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredRadialAcceleration_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:HasDynamicValue ?BaseStarMeasuredRadialAcceleration .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsOfMeasurableQuantity quantity:accelerationDrilling .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsTransformationInput ?MovingMaxBaseStarMeasuredPeakRadialAcceleration .
+	?GaussianUncertaintyBaseStarMeasuredPeakRadialAcceleration_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredPeakRadialAcceleration_01 .
+	?GaussianUncertaintyBaseStarMeasuredPeakRadialAcceleration_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredPeakRadialAcceleration_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?pipeSection_01 rdf:type ddhub:PipeSectionMechanicalLogicalElement .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsMechanicallyLocatedAt ?pipeSection_01 .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsMechanicallyLocatedAt ?pipeSection_01 .
+	?RadialReferenceFrame_01 rdf:type ddhub:RadialReferenceFrame .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:HasReferenceFrame ?RadialReferenceFrame_01 .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:HasReferenceFrame ?RadialReferenceFrame_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

@@ -1,7 +1,7 @@
 {
   "ManifestName": "BaseStarDataManifest",
   "Provider": {
-    "Name": "BaseStarDataManifestDWIS",
+    "Name": "BaseStarDataManifestDWISBridge",
     "Company": "Halliburton"
   },
   "InjectionInformation": {

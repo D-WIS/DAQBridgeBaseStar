@@ -1,0 +1,32 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredAverageRadialAcceleration
+WHERE {
+	?BaseStarMeasuredAverageRadialAcceleration_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAverageRadialAcceleration_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageRadialAcceleration_01 ddhub:HasDynamicValue ?BaseStarMeasuredAverageRadialAcceleration .
+	?BaseStarMeasuredAverageRadialAcceleration_01 ddhub:IsOfMeasurableQuantity quantity:accelerationDrilling .
+	?MovingAverageBaseStarMeasuredAverageRadialAcceleration rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredAverageRadialAcceleration_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredAverageRadialAcceleration .
+	?BaseStarMeasuredRadialAcceleration_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredRadialAcceleration_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:HasDynamicValue ?BaseStarMeasuredRadialAcceleration .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsOfMeasurableQuantity quantity:accelerationDrilling .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsTransformationInput ?MovingAverageBaseStarMeasuredAverageRadialAcceleration .
+	?GaussianUncertaintyBaseStarMeasuredAverageRadialAcceleration_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredAverageRadialAcceleration_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredAverageRadialAcceleration_01 .
+	?GaussianUncertaintyBaseStarMeasuredAverageRadialAcceleration_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredAverageRadialAcceleration_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredAverageRadialAcceleration_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?pipeSection_01 rdf:type ddhub:PipeSectionMechanicalLogicalElement .
+	?BaseStarMeasuredAverageRadialAcceleration_01 ddhub:IsMechanicallyLocatedAt ?pipeSection_01 .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsMechanicallyLocatedAt ?pipeSection_01 .
+	?RadialReferenceFrame_01 rdf:type ddhub:RadialReferenceFrame .
+	?BaseStarMeasuredAverageRadialAcceleration_01 ddhub:HasReferenceFrame ?RadialReferenceFrame_01 .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:HasReferenceFrame ?RadialReferenceFrame_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredAverageRadialAcceleration_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

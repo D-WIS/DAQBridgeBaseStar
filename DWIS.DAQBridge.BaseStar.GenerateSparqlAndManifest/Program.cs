@@ -1,273 +1,57 @@
-﻿using DWIS.API.DTO;
+using System.Text;
+using System.Text.Json;
 using DWIS.DAQBridge.BaseStar.Model;
 using OSDC.DotnetLibraries.Drilling.DrillingProperties;
-using System.Reflection;
 
-namespace DWIS.DAQBridge.BaseStar.GenerateSparqlAndManifest
+namespace DWIS.DAQBridge.BaseStar.GenerateSparqlAndManifest;
+
+internal static class Program
 {
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly UTF8Encoding Utf8 = new(false);
 
-    class Progam
+    private static void Main(string[] args)
     {
-        static void GenerateSparQLForMD(StreamWriter writer, Dictionary<string, QuerySpecification>? queries, string procedureClassName)
+        string directory = args.Length == 1 ? Path.GetFullPath(args[0]) : FindProjectDirectory();
+        if (args.Length > 1) throw new ArgumentException("Usage: GenerateSparqlAndManifest [output-directory]");
+        Directory.CreateDirectory(directory);
+        var data = new MechanicalSubOutputDataMudPulseTelemetry();
+        using var documentation = new StreamWriter(Path.Combine(directory, "MechanicalSubOutputDataMudPulseTelemetry.md"), false, Utf8);
+        documentation.WriteLine("# BaseStar signal manifests and discovery queries");
+        documentation.WriteLine();
+        documentation.WriteLine("Generated from the model's runtime manifests and query sets. Do not edit directly.");
+        foreach (var (property, manifest) in data.Manifests.Value)
         {
-            if (writer != null && queries != null)
+            File.WriteAllText(Path.Combine(directory, $"BaseStar.{property.Name}.json"),
+                JsonSerializer.Serialize(manifest, JsonOptions) + "\n", Utf8);
+            documentation.WriteLine($"\n## {property.Name}\n");
+            documentation.WriteLine("```mermaid");
+            documentation.WriteLine(GeneratorSparQLManifestFile.GetMermaid(manifest));
+            documentation.WriteLine("```");
+            var queries = data.SparQLQueries.Value[property];
+            int index = 0;
+            foreach (var (name, query) in queries)
             {
-                writer.WriteLine("# Semantic Queries for the class `" + procedureClassName + "`");
-                foreach (var query in queries)
-                {
-                    if (query.Value != null)
-                    {
-                        writer.WriteLine("## " + query.Key);
-                        writer.WriteLine("```sparql");
-                        writer.WriteLine(query.Value.SparQL);
-                        writer.WriteLine("```");
-                    }
-                }
-            }
-            else
-            {
-                bool glups = true;
+                string suffix = queries.Count == 1 ? "" : $".{index++}";
+                File.WriteAllText(Path.Combine(directory, $"BaseStar.{property.Name}{suffix}.sparql"), query.SparQL!.TrimEnd() + "\n", Utf8);
+                documentation.WriteLine($"\n### {name}\n");
+                documentation.WriteLine("```sparql");
+                documentation.WriteLine(query.SparQL!.TrimEnd());
+                documentation.WriteLine("```");
             }
         }
-        static void GenerateSparQLForMD(StreamWriter writer, string propertyName, string? query)
-        {
-            if (writer != null && !string.IsNullOrEmpty(query))
-            {
-                writer.WriteLine("# Alternate Semantic Query for `" + propertyName + "`");
-                writer.WriteLine("```sparql");
-                writer.WriteLine(query);
-                writer.WriteLine("```");
-            }
-            else
-            {
-                bool glups = true;
-            }
-        }
-        static void GenerateSparQLForMD(StreamWriter writer, string propertyName, Dictionary<string, QuerySpecification>? queries)
-        {
-            if (writer != null && !string.IsNullOrEmpty(propertyName) && queries != null)
-            {
-                writer.WriteLine("# Semantic Queries for `" + propertyName + "`");
-                foreach (var query in queries)
-                {
-                    if (query.Value != null)
-                    {
-                        writer.WriteLine("## " + query.Key);
-                        writer.WriteLine("```sparql");
-                        writer.WriteLine(query.Value.SparQL);
-                        writer.WriteLine("```");
-                    }
-                }
-            }
-            else
-            {
-                bool glups = true;
-            }
-        }
+        Console.WriteLine($"Generated {data.Manifests.Value.Count} manifests and their discovery queries in {directory}.");
+    }
 
-        static void GenerateMermaidForMD(StreamWriter writer, string propertyName, string? mermaid)
+    private static string FindProjectDirectory()
+    {
+        DirectoryInfo? directory = new(AppContext.BaseDirectory);
+        while (directory is not null)
         {
-            if (writer != null && !string.IsNullOrEmpty(propertyName) && !string.IsNullOrEmpty(mermaid))
-            {
-                writer.WriteLine("# Semantic Graph for `" + propertyName + "`");
-                writer.WriteLine(mermaid);
-            }
-            else
-            {
-                bool glups = true;
-            }
+            if (File.Exists(Path.Combine(directory.FullName, "DWIS.DAQBridge.BaseStar.GenerateSparqlAndManifest.csproj")))
+                return directory.FullName;
+            directory = directory.Parent;
         }
-
-        static void DumpToJson(ManifestFile manifestFile, string filename)
-        {
-            string tempPath = Directory.GetCurrentDirectory();
-            DirectoryInfo? dir = new DirectoryInfo(tempPath);
-            dir = dir?.Parent?.Parent?.Parent;
-            if (dir != null)
-            {
-                string tempFile = Path.Combine(dir.FullName, filename + ".json");
-                using (StreamWriter writer = new StreamWriter(tempFile))
-                {
-                    string json = System.Text.Json.JsonSerializer.Serialize(manifestFile, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-                    writer.WriteLine(json);
-                }
-            }
-        }
-        static void Main()
-        {
-            MechanicalSubOutputDataMudPulseTelemetry testClass = new MechanicalSubOutputDataMudPulseTelemetry();
-            Assembly? assembly = Assembly.GetAssembly(typeof(MechanicalSubOutputDataMudPulseTelemetry));
-            if (assembly != null)
-            {
-                string tempPath = Directory.GetCurrentDirectory();
-                DirectoryInfo? dir = new DirectoryInfo(tempPath);
-                dir = dir?.Parent?.Parent?.Parent;
-                if (dir != null)
-                {
-                    string tempFile = Path.Combine(dir.FullName, "MechanicalSubOutputDataMudPulseTelemetry.md");
-                    using (StreamWriter writer = new StreamWriter(tempFile))
-                    {
-                        var manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "AverageRotationalSpeed", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "AverageRotationalSpeed", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.AverageRotationalSpeed");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MaxRotationalSpeed", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MaxRotationalSpeed", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MaxRotationalSpeed");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "StickSlipIndicator", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "StickSlipIndicator", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.StickSlipIndicator");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "PeakRadialAcceleration", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "PeakRadialAcceleration", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.PeakRadialAcceleration");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "AverageRadialAcceleration", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "AverageRadialAcceleration", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.AverageRadialAcceleration");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "PeakAxialAcceleration", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "PeakAxialAcceleration", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.PeakAxialAcceleration");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "AverageRawWeight", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "AverageRawWeight", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.AverageRawWeight");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MinRawWeight", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MinRawWeight", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MinRawWeight");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MaxRawWeight", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MaxRawWeight", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MaxRawWeight");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "TareBitWeight", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "TareBitWeight", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.TareBitWeight");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "AverageBitWeight", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "AverageBitWeight", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.AverageBitWeight");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MinBitWeight", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MinBitWeight", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MinBitWeight");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MaxBitWeight", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MaxBitWeight", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MaxBitWeight");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "AverageRawTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "AverageRawTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.AverageRawTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MinRawTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MinRawTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MinRawTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MaxRawTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MaxRawTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MaxRawTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "TorqueBias", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "TorqueBias", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.TorqueBias");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "AverageCorrectedTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "AverageCorrectedTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.AverageCorrectedTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MinCorrectedTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MinCorrectedTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MinCorrectedTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MaxCorrectedTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MaxCorrectedTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MaxCorrectedTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "AverageBitTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "AverageBitTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.AverageBitTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MinBitTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MinBitTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MinBitTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "MaxBitTorque", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "MaxBitTorque", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.MaxBitTorque");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "ElectronicTemperature", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "ElectronicTemperature", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.ElectronicTemperature");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "StringPressure", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "StringPressure", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.StringPressure");
-                        }
-                        manifest = GeneratorSparQLManifestFile.GetManifestFile(assembly, typeof(MechanicalSubOutputDataMudPulseTelemetry).FullName, "AnnulusPressure", "BaseStarDataManifest", "Halliburton", "DWIS");
-                        if (manifest != null)
-                        {
-                            GenerateMermaidForMD(writer, "AnnulusPressure", GeneratorSparQLManifestFile.GetMermaid(manifest));
-                            DumpToJson(manifest, "BaseStar.AnnulusPressure");
-                        }
-                    }
-                }
-            }
-        }
+        throw new DirectoryNotFoundException("Specify an output directory when running outside the source tree.");
     }
 }
-
-

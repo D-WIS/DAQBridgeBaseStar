@@ -1,0 +1,17 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?TareBitWeightForMudPulseTelemetry
+WHERE {
+	?TareBitWeightForMudPulseTelemetry_01 rdf:type ddhub:ProcessData .
+	?TareBitWeightForMudPulseTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:HasDynamicValue ?TareBitWeightForMudPulseTelemetry .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

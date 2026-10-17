@@ -1,0 +1,32 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredMinBitWeight
+WHERE {
+	?BaseStarMeasuredMinBitWeight_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMinBitWeight_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMinBitWeight_01 ddhub:HasDynamicValue ?BaseStarMeasuredMinBitWeight .
+	?BaseStarMeasuredMinBitWeight_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?MovingMinBaseStarMeasuredMinBitWeight rdf:type ddhub:MovingMin .
+	?BaseStarMeasuredMinBitWeight_01 ddhub:IsTransformationOutput ?MovingMinBaseStarMeasuredMinBitWeight .
+	?taringTransformationMinWOB rdf:type ddhub:SummationTransformation .
+	?BaseStarMeasuredMinRawWeight_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMinRawWeight_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMinRawWeight_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?BaseStarMeasuredMinRawWeight_01 ddhub:IsTransformationInput ?taringTransformationMinWOB .
+	?TareBitWeightForMudPulseTelemetry_01 rdf:type ddhub:ProcessData .
+	?TareBitWeightForMudPulseTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsTransformationInput ?taringTransformationMinWOB .
+	?BaseStarMeasuredMinBitWeight_01 ddhub:IsTransformationOutput ?taringTransformationMinWOB .
+	?GaussianUncertaintyBaseStarMeasuredMinBitWeight_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredMinBitWeight_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredMinBitWeight_01 .
+	?GaussianUncertaintyBaseStarMeasuredMinBitWeight_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredMinBitWeight_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredMinBitWeight_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?Bit_01 rdf:type ddhub:EndOfStringMechanicalLogicalElement .
+	?BaseStarMeasuredMinBitWeight_01 ddhub:IsMechanicallyLocatedAt ?Bit_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredMinBitWeight_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

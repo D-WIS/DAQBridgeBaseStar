@@ -1,0 +1,26 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredStringPressure
+WHERE {
+	?BaseStarMeasuredStringPressure_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredStringPressure_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredStringPressure_01 ddhub:HasDynamicValue ?BaseStarMeasuredStringPressure .
+	?BaseStarMeasuredStringPressure_01 ddhub:IsOfMeasurableQuantity quantity:pressureDrilling .
+	?MovingAverageBaseStarMeasuredStringPressure rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredStringPressure_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredStringPressure .
+	?GaussianUncertaintyBaseStarMeasuredStringPressure_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredStringPressure_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredStringPressure_01 .
+	?GaussianUncertaintyBaseStarMeasuredStringPressure_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredStringPressure_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?BaseStarMeasuredStringPressure_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
+	?topOfStringJunction_01 rdf:type ddhub:TopOfStringJunction .
+	?stringHydraulicBranch_01 rdf:type ddhub:HydraulicBranch .
+	?topOfStringJunction_01 ddhub:HasDownstreamBranch ?stringHydraulicBranch_01 .
+	?BaseStarMeasuredStringPressure_01 ddhub:IsAssociatedToHydraulicBranch ?stringHydraulicBranch_01 .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredStringPressure_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredStringPressure_01 ddhub:IsProvidedBy ?Halliburton_01 .
+}

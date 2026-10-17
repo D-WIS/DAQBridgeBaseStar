@@ -1,7 +1,7 @@
 {
   "ManifestName": "BaseStarDataManifest",
   "Provider": {
-    "Name": "BaseStarDataManifestDWIS",
+    "Name": "BaseStarDataManifestDWISBridge",
     "Company": "Halliburton"
   },
   "InjectionInformation": {
@@ -38,9 +38,9 @@
     },
     {
       "TypeDictionaryURI": "DerivedMeasurement",
-      "BrowseName": "BaseStarMeasuredAverageRawTorque#01",
-      "UniqueName": "BaseStarMeasuredAverageRawTorque#01",
-      "DisplayName": "BaseStarMeasuredAverageRawTorque#01",
+      "BrowseName": "BaseStarMeasuredMaxRawTorque#01",
+      "UniqueName": "BaseStarMeasuredMaxRawTorque#01",
+      "DisplayName": "BaseStarMeasuredMaxRawTorque#01",
       "Fields": null
     },
     {
@@ -94,7 +94,7 @@
     {
       "Subject": {
         "NameSpace": "nodes",
-        "ID": "BaseStarMeasuredAverageRawTorque#01"
+        "ID": "BaseStarMeasuredMaxRawTorque#01"
       },
       "VerbURI": "http://ddhub.no/BelongsToClass",
       "Object": {
@@ -149,7 +149,7 @@
     {
       "Subject": {
         "NameSpace": "nodes",
-        "ID": "BaseStarMeasuredAverageRawTorque#01"
+        "ID": "BaseStarMeasuredMaxRawTorque#01"
       },
       "VerbURI": "http://ddhub.no/IsOfMeasurableQuantity",
       "Object": {
@@ -160,7 +160,7 @@
     {
       "Subject": {
         "NameSpace": "nodes",
-        "ID": "BaseStarMeasuredAverageRawTorque#01"
+        "ID": "BaseStarMeasuredMaxRawTorque#01"
       },
       "VerbURI": "http://ddhub.no/IsTransformationInput",
       "Object": {
