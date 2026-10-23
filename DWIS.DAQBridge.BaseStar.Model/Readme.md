@@ -1,5 +1,5 @@
 # Semantic Descriptions of the Signals used by the BaseStar Mechanical Sub Bridge to D-WIS
-This project retains the scalar BaseStar model and its generators for source compatibility. Active provider hosts use the shared DownholeMechanical contract and runtime in the sibling Common repository.
+This project retains the scalar BaseStar model and its generators for source compatibility. Active provider hosts use the shared DownholeMechanical contract and runtime NuGet packages (1.0.0), published from Common.
 
 ## Purpose
 - Provide a single, authoritative description of BaseStar signal meaning.

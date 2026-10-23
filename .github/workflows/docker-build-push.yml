@@ -1,11 +1,9 @@
 name: Test and publish BaseStar downhole images
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
-    inputs:
-      common_ref:
-        description: Full D-WIS/Common commit SHA containing the downhole contract and runtime
-        required: true
-        type: string
 permissions:
   contents: read
 jobs:
@@ -13,27 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: DAQBridgeBaseStar
-      - uses: actions/checkout@v4
-        with:
-          repository: D-WIS/Common
-          ref: ${{ inputs.common_ref }}
-          path: Common
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Verify pinned shared source
-        shell: bash
+      - run: dotnet build DWIS.DAQBridge.BaseStar.sln -c Release
+      - run: dotnet test DWIS.DAQBridge.BaseStar.sln -c Release --no-build
+      - name: Validate provider configuration
         env:
-          COMMON_REF: ${{ inputs.common_ref }}
+          DWIS_CONFIG_PATH: config/downhole.config.example.json
+        run: dotnet run --project DWIS.DAQBridge.BaseStar.Server/DWIS.DAQBridge.BaseStar.Server.csproj -c Release --no-build -- --validate-config
+      - name: Verify packaged OPC-UA configuration assets
+        shell: pwsh
         run: |
-          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ ]]
-          test "$(git -C Common rev-parse HEAD)" = "$COMMON_REF"
-      - run: dotnet build DAQBridgeBaseStar/DWIS.DAQBridge.BaseStar.sln -c Release
-      - run: dotnet test DAQBridgeBaseStar/DWIS.DAQBridge.BaseStar.sln -c Release --no-build
-      - run: dotnet test Common/DWIS.RigOS.DownholeMechanical.Tests/DWIS.RigOS.DownholeMechanical.Tests.csproj -c Release --filter 'TestCategory!=Integration'
+          foreach ($role in @('Server', 'OPCUASource', 'BlackboardSink')) {
+            $asset = "DWIS.DAQBridge.BaseStar.$role/bin/Release/net8.0/config/Quickstarts.ReferenceClient.Config.xml"
+            if (-not (Test-Path $asset)) { throw "Missing packaged runtime configuration: $asset" }
+          }
   publish:
+    if: github.event_name == 'workflow_dispatch'
     needs: verify
     runs-on: ubuntu-latest
     strategy:
@@ -41,13 +36,6 @@ jobs:
         role: [Server, OPCUASource, BlackboardSink]
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: DAQBridgeBaseStar
-      - uses: actions/checkout@v4
-        with:
-          repository: D-WIS/Common
-          ref: ${{ inputs.common_ref }}
-          path: Common
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
@@ -60,11 +48,10 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: DAQBridgeBaseStar/DWIS.DAQBridge.BaseStar.${{ matrix.role }}/Dockerfile
+          file: DWIS.DAQBridge.BaseStar.${{ matrix.role }}/Dockerfile
           push: true
           tags: |
             ${{ steps.image.outputs.name }}:stable
-            ${{ steps.image.outputs.name }}:sha-${{ github.sha }}-common-${{ inputs.common_ref }}
+            ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
           labels: |
             org.opencontainers.image.revision=${{ github.sha }}
-            no.dwis.common.revision=${{ inputs.common_ref }}

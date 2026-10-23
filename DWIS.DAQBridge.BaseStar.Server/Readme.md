@@ -184,7 +184,7 @@ The OPC-UA node ids are identical to the internal ones and the unit conversion f
 
 
 ## Downhole contract runtime
-This Server host runs `RuntimeHost` for BaseStar. See the repository README and sibling Common
-runtime README for `/home/config.json`, explicit identity/node/unit mappings, telemetry,
+This Server host runs `RuntimeHost` for BaseStar. It consumes `DWIS.RigOS.DownholeMechanical.Bridge` NuGet 1.0.0. See the repository README
+and the [shared runtime documentation](https://github.com/D-WIS/Common/blob/main/DWIS.RigOS.DownholeMechanical.Bridge/README.md) for `/home/config.json`, explicit identity/node/unit mappings, telemetry,
 reconnection, persistent logging and Docker build contexts. Existing legacy workers are not
 registered by this host.

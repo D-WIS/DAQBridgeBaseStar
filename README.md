@@ -224,7 +224,7 @@ DWIS dependencies are selected in the Model project: RigOS Common Worker
 ## Shared downhole mechanical contract
 
 The active Server, OPCUASource and BlackboardSink hosts now use the shared runtime in
-`../Common/DWIS.RigOS.DownholeMechanical.Bridge` and contract version v1 in
+`DWIS.RigOS.DownholeMechanical.Bridge` NuGet (1.0.0) and contract version v1 in
 `DWIS.RigOS.Contracts.DownholeMechanical` (package 1.0.0). See that runtime README for the
 identity/placement algorithm, callbacks, telemetry, compact six-hour logs, retention and tests.
 The earlier source/model classes and generated scalar artifacts remain preserved; their old
@@ -250,11 +250,12 @@ for example `http://host.docker.internal:54321/` for the local contract service.
 be rebuilt/published to serve the new DownholeMechanical routes. The contextual DrillString
 bridge must also include the refreshed generated DTOs so it does not discard identity fields.
 
-Docker builds use a context containing sibling `DAQBridgeBaseStar/` and `Common/` folders.
-The manual GitHub workflow takes the full Common source commit SHA, verifies/builds/tests, then
-publishes Server, OPCUASource and BlackboardSink images as `stable` plus immutable provider/Common
-revision tags. No workflow is dispatched as part of implementation. Existing BaseStar local
-changes are preserved and its regression tests continue to run.
+Docker builds use this repository root as their context; no sibling Common checkout is needed.
+The contract and runtime are pinned to NuGet version 1.0.0. For example:
+`docker build -f DWIS.DAQBridge.BaseStar.Server/Dockerfile .`
+GitHub Actions builds and validates on pushes and pull requests. Only a manual workflow dispatch
+publishes Server, OPCUASource and BlackboardSink images as `stable` plus immutable commit-SHA tags.
+No `common_ref` input or cross-repository checkout is used.
 
 BaseStar accepts mud pulse only, or mud pulse plus wired pipe; every configured instrument
 must have a mud-pulse path. The example preserves the 26 inspected legacy channel meanings

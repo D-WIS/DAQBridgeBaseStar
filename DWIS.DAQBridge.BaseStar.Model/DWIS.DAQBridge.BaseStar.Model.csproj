@@ -27,5 +27,5 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup><ProjectReference Include="../../Common/DWIS.RigOS.Contracts.DownholeMechanical/DWIS.RigOS.Contracts.DownholeMechanical.csproj" /></ItemGroup>
+  <ItemGroup><PackageReference Include="DWIS.RigOS.Contracts.DownholeMechanical" Version="1.0.0" /></ItemGroup>
 </Project>

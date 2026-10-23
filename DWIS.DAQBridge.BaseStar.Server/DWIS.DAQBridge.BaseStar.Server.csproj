@@ -30,5 +30,5 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-  <ItemGroup><ProjectReference Include="../../Common/DWIS.RigOS.DownholeMechanical.Bridge/DWIS.RigOS.DownholeMechanical.Bridge.csproj" /></ItemGroup>
+  <ItemGroup><PackageReference Include="DWIS.RigOS.DownholeMechanical.Bridge" Version="1.0.0" /></ItemGroup>
 </Project>
