@@ -251,7 +251,7 @@ be rebuilt/published to serve the new DownholeMechanical routes. The contextual 
 bridge must also include the refreshed generated DTOs so it does not discard identity fields.
 
 Docker builds use this repository root as their context; no sibling Common checkout is needed.
-The contract and runtime are pinned to NuGet version 1.0.0. For example:
+The contract is pinned to NuGet 1.0.0 and runtime to 1.0.2. For example:
 `docker build -f DWIS.DAQBridge.BaseStar.Server/Dockerfile .`
 GitHub Actions builds and validates on pushes and pull requests. Only a manual workflow dispatch
 publishes Server, OPCUASource and BlackboardSink images as `stable` plus immutable commit-SHA tags.
@@ -259,5 +259,26 @@ No `common_ref` input or cross-repository checkout is used.
 
 BaseStar accepts mud pulse only, or mud pulse plus wired pipe; every configured instrument
 must have a mud-pulse path. The example preserves the 26 inspected legacy channel meanings
-and illustrates one mud-only unit and one dual-telemetry unit. Additional accelerometer/gyro/
+and now illustrates one physical unit with both telemetry paths. Additional accelerometer/gyro/
 magnetometer/bending channels can be mapped explicitly without inventing their statistics.
+
+## One BaseStar with independent telemetry schedules
+The example has one physical equipment UUID, with 26 individual OPC-UA nodes per telemetry path.
+Matching channel meanings on the two paths share the same SensorID and equipment identity; their
+NodeIDs remain distinct. The paired DrillString fixture contains only that physical instrument.
+
+SimulatorProductionInterval is `00:00:02.540`: all 26 wired-pipe values share a production time
+and are updated together every 2.54 seconds. SimulatorMudPulseCycleDuration is `00:01:00`: the
+26 mud-pulse channels are transmitted one at a time in config order, about 2.3076923 seconds
+apart. The complete set spans the 60-second cycle and each individual channel repeats after 60
+seconds. Only that channel gets a new source timestamp; the others keep their prior timestamps.
+No synchronized mud-pulse dataset is synthesized. Values not sent yet remain unavailable.
+
+SimulatorPhaseOffset is zero in the example. Both schedules restart from the source's startup
+origin. Blackboard publication throttles are separate: wired pipe 2.54 seconds and mud pulse one
+second, allowing each arrival through. MaximumInputAge is 120 seconds, longer than a full
+mud-pulse cycle, so ordinary interleaving does not blank healthy slow channels.
+
+Runtime 1.0.2 is published from Common through NuGet Trusted Publishing. Restore from nuget.org;
+no local feed or ProjectReference to Common is needed. Pushes run verification; Docker image
+publication and deployment remain separate release steps.

@@ -40,7 +40,12 @@ certificate paths are under `/home/logs` and `/home/pki/basestar-source`.
 
 
 ## Downhole contract runtime
-This OPCUASource host runs `RuntimeHost` for BaseStar. It consumes `DWIS.RigOS.DownholeMechanical.Bridge` NuGet 1.0.0. See the repository README
+This OPCUASource host runs `RuntimeHost` for BaseStar. It consumes `DWIS.RigOS.DownholeMechanical.Bridge` NuGet 1.0.2. See the repository README
 and the [shared runtime documentation](https://github.com/D-WIS/Common/blob/main/DWIS.RigOS.DownholeMechanical.Bridge/README.md) for `/home/config.json`, explicit identity/node/unit mappings, telemetry,
 reconnection, persistent logging and Docker build contexts. Existing legacy workers are not
 registered by this host.
+
+The current example simulates one BaseStar: all 26 wired-pipe values every 2.54 seconds,
+and 26 mud-pulse values one at a time across a 60-second cycle. Configure the instrument's
+SimulatorProductionInterval and SimulatorMudPulseCycleDuration; see the root README for
+ordering, timestamps, freshness and local preview-package verification.

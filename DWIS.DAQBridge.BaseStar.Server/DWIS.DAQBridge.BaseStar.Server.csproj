@@ -30,5 +30,5 @@
       <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
-  <ItemGroup><PackageReference Include="DWIS.RigOS.DownholeMechanical.Bridge" Version="1.0.0" /></ItemGroup>
+  <ItemGroup><PackageReference Include="DWIS.RigOS.DownholeMechanical.Bridge" Version="1.0.2" /></ItemGroup>
 </Project>

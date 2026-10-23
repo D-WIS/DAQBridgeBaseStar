@@ -3,7 +3,7 @@
     "ID": "b6c2d2fa-ea99-5c86-b59f-e70d225e9cf0"
   },
   "Name": "BaseStar simulator drill string",
-  "LastModificationDate": "2026-10-22T00:00:00Z",
+  "LastModificationDate": "2026-10-23T00:00:00Z",
   "DrillStringSectionList": [
     {
       "Count": 1,
@@ -11,24 +11,9 @@
       "SectionComponentList": [
         {
           "MetaInfo": {
-            "ID": "51886504-6c3a-5ea1-96f6-085b7dc668ca"
-          },
-          "Name": "BaseStarMudPulse",
-          "EquipmentIdentity": {
-            "EquipmentInstanceID": "235559e0-b904-5335-bcc9-6b35cb953333",
-            "Manufacturer": "Halliburton",
-            "ModelIdentifier": "Halliburton/BaseStar",
-            "ModelName": "BaseStar",
-            "SerialNumber": "SIM-BaseStarMudPulse",
-            "AssetIdentifier": "SIM-1"
-          },
-          "PartList": []
-        },
-        {
-          "MetaInfo": {
             "ID": "ee89824a-d6d7-55e9-b874-a5147a65b517"
           },
-          "Name": "BaseStarDualTelemetry",
+          "Name": "BaseStar",
           "EquipmentIdentity": {
             "EquipmentInstanceID": "3b8f68b5-cac6-54ec-afb4-2eb2cf86743b",
             "Manufacturer": "Halliburton",
@@ -43,76 +28,6 @@
     }
   ],
   "SensorsList": [
-    {
-      "SensorID": "383118ac-c7fe-57dc-96a1-d5568a5ab615",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 2048,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "2646dd8e-aad7-526e-a38a-09b7a12b0050",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 2048,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "6d191ff0-6a23-5ab6-b766-d6a7fc172167",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 6,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "e6728ef7-c87f-5127-b7a8-ff79802b1406",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 8,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "940a0805-7985-5eee-9271-ed390ce750c9",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 4194304,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "ddd391c5-a22a-5c3b-8b37-fc28eaf35b0d",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 4194304,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "5a6c1614-1e95-5567-bbd9-2b6a35e69186",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 8388608,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "bf7cef51-9322-5399-b51a-8f7392c8b549",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 262144,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "5300ab4f-2e00-5d2c-9650-af51fa04a83e",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 32768,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
-    {
-      "SensorID": "a025e17d-968c-593f-b255-470c2625872c",
-      "ComponentID": "51886504-6c3a-5ea1-96f6-085b7dc668ca",
-      "SensorTypeInt": 65536,
-      "DistanceFromBit": 12.0,
-      "SensorAngles": []
-    },
     {
       "SensorID": "9854f4c1-c340-526d-a8f7-7ce21c46c44d",
       "ComponentID": "ee89824a-d6d7-55e9-b874-a5147a65b517",
