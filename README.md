@@ -206,13 +206,11 @@ stores logs under `/home/logs` and certificate/cache state under
 `/home/pki/basestar-server` or `/home/pki/basestar-source`; unsecured connections may
 not create certificate stores until needed. Local development XML remains separate.
 
-`.github/workflows/docker-build-push.yml` runs on main pushes or manual dispatch.
-It restores, builds and tests the solution in Release before publishing both images:
-`digiwells/dwisdaqbridgebasestarserver` and
-`digiwells/dwisdaqbridgebasestaropcuasource`. Each receives `stable` and
-`sha-<full commit SHA>` tags. Existing `DOCKERHUB_USERNAME` and `DOCKERHUB_PASSWORD`
-repository secrets are required. The workflow publishes images; deployment is separate.
-Use the immutable SHA tag when reproducibility is required.
+.github/workflows/docker-build-push.yml runs verification on main pushes and pull requests.
+Manual dispatch publishes all three images: digiwells/dwisdaqbridgebasestarserver,
+digiwells/dwisdaqbridgebasestaropcuasource and digiwells/dwisdaqbridgebasestarblackboardsink.
+Each receives stable and sha-<full commit SHA> tags. DOCKERHUB_USERNAME and
+DOCKERHUB_PASSWORD repository secrets are required. Deployment is a separate step.
 
 ## DWIS package versions
 DWIS dependencies are selected in the Model project: RigOS Common Worker
@@ -224,7 +222,7 @@ DWIS dependencies are selected in the Model project: RigOS Common Worker
 ## Shared downhole mechanical contract
 
 The active Server, OPCUASource and BlackboardSink hosts now use the shared runtime in
-`DWIS.RigOS.DownholeMechanical.Bridge` NuGet (1.0.0) and contract version v1 in
+`DWIS.RigOS.DownholeMechanical.Bridge` NuGet (1.0.3) and contract version v1 in
 `DWIS.RigOS.Contracts.DownholeMechanical` (package 1.0.0). See that runtime README for the
 identity/placement algorithm, callbacks, telemetry, compact six-hour logs, retention and tests.
 The earlier source/model classes and generated scalar artifacts remain preserved; their old
@@ -251,7 +249,7 @@ be rebuilt/published to serve the new DownholeMechanical routes. The contextual 
 bridge must also include the refreshed generated DTOs so it does not discard identity fields.
 
 Docker builds use this repository root as their context; no sibling Common checkout is needed.
-The contract is pinned to NuGet 1.0.0 and runtime to 1.0.2. For example:
+The contract is pinned to NuGet 1.0.0 and runtime to 1.0.3. For example:
 `docker build -f DWIS.DAQBridge.BaseStar.Server/Dockerfile .`
 GitHub Actions builds and validates on pushes and pull requests. Only a manual workflow dispatch
 publishes Server, OPCUASource and BlackboardSink images as `stable` plus immutable commit-SHA tags.
@@ -275,10 +273,22 @@ seconds. Only that channel gets a new source timestamp; the others keep their pr
 No synchronized mud-pulse dataset is synthesized. Values not sent yet remain unavailable.
 
 SimulatorPhaseOffset is zero in the example. Both schedules restart from the source's startup
-origin. Blackboard publication throttles are separate: wired pipe 2.54 seconds and mud pulse one
-second, allowing each arrival through. MaximumInputAge is 120 seconds, longer than a full
+origin. Every changed wired-pipe frame is published without an output throttle. Mud-pulse
+publication retains its one-second minimum interval, allowing each arrival through. MaximumInputAge is 120 seconds, longer than a full
 mud-pulse cycle, so ordinary interleaving does not blank healthy slow channels.
 
-Runtime 1.0.2 is published from Common through NuGet Trusted Publishing. Restore from nuget.org;
+Runtime 1.0.3 is published from Common through NuGet Trusted Publishing. Restore from nuget.org;
 no local feed or ProjectReference to Common is needed. Pushes run verification; Docker image
 publication and deployment remain separate release steps.
+
+## Runtime 1.0.3 delivery and durability
+OPC-UA subscription callbacks preserve every source sample, including multiple queued changes
+for the same node. The bridge force-flushes each received batch to its compact input journal
+before processing it; six-hour rotation and the shared storage limit still apply. Placement
+resolution is cached by current DrillString revision. The simulator uses a dedicated production
+clock, and transient subscription timeouts have a bounded recovery grace period.
+
+The current DrillString must be advertised on the Blackboard after a Blackboard restart; starting
+a measurement source alone does not restore contextual semantics. Equipment identity and sensor
+positions are resolved from that description. WiredPipePublishInterval is retained as a simulator
+fallback when SimulatorProductionInterval is omitted; it no longer drops wired-pipe arrivals.
