@@ -21,3 +21,10 @@ This project provides DWIS Blackboard sink that reads Base Star mechanical sub s
 From the solution directory, run
 `dotnet run --project DWIS.DAQBridge.BaseStar.BlackboardSink/DWIS.DAQBridge.BaseStar.BlackboardSink.csproj`.
 The project, assembly, and namespace are `DWIS.DAQBridge.BaseStar.BlackboardSink`.
+
+
+## Downhole contract runtime
+This BlackboardSink host runs `RuntimeHost` for BaseStar. See the repository README and sibling Common
+runtime README for `/home/config.json`, explicit identity/node/unit mappings, telemetry,
+reconnection, persistent logging and Docker build contexts. Existing legacy workers are not
+registered by this host.

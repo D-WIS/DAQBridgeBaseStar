@@ -19,6 +19,7 @@ WHERE {
 	?BaseStarMeasuredMaxRawTorque_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredMaxRawTorque_01 .
 	?GaussianUncertaintyBaseStarMeasuredMaxRawTorque_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredMaxRawTorque_01 .
 	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
 	?BaseStarMeasuredMaxRawTorque_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
 	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
 	?BaseStarMeasuredMaxRawTorque_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
@@ -26,4 +27,15 @@ WHERE {
 	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
 	?BaseStarMeasuredMaxRawTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
 	?BaseStarMeasuredRawTorque_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?BaseStarMeasuredMaxRawTorque_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
 }

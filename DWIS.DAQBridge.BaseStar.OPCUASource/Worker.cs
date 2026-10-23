@@ -1,12 +1,14 @@
 using System.Diagnostics;
+using System.Reflection;
 using DWIS.Client.ReferenceImplementation.OPCFoundation;
 using DWIS.RigOS.Common.Worker;
 using DWIS.DAQBridge.BaseStar.Model;
 
 namespace DWIS.DAQBridge.BaseStar.OPCUASource;
 
-public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStarSimulation>
+public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStarSimulation, object>
 {
+    private BaseStarSnapshot? _lastPublished;
     public Worker(ILogger<IDWISWorker<ConfigurationForBaseStarSimulation>> logger, ILogger<DWISClientOPCF>? loggerDWISClient)
         : base(logger, loggerDWISClient) { }
 
@@ -34,6 +36,11 @@ public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStarSimulation>
 
     protected override async Task PublishOPCUAAsync(DWISDataWithOPCUA data, string? configuredNamespace,
         string? configuredPrefix, Dictionary<string, string>? configuredIds, CancellationToken stoppingToken)
+        => await PublishOPCUAAsync(data, configuredNamespace, configuredPrefix, configuredIds, stoppingToken, _ => true);
+
+    private async Task PublishOPCUAAsync(DWISDataWithOPCUA data, string? configuredNamespace,
+        string? configuredPrefix, Dictionary<string, string>? configuredIds, CancellationToken stoppingToken,
+        Func<PropertyInfo, bool> include)
     {
         if (_OPCUAClient?.Connected != true) throw new InvalidOperationException("The simulation OPC-UA endpoint is unavailable.");
         var values = new List<(string, string, object, DateTime)>();
@@ -41,8 +48,13 @@ public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStarSimulation>
         foreach (var (property, node) in data.OPCUANodes.Value)
         {
             stoppingToken.ThrowIfCancellationRequested();
+            if (!include(property)) continue;
             if (property.GetValue(data) is not ScalarProperty { Value: double value }) continue;
-            string? ns = string.IsNullOrEmpty(configuredNamespace) ? node.NameSpace : configuredNamespace;
+            string? ns = !string.IsNullOrEmpty(node.ID) &&
+                Configuration?.OPCUANameSpaces?.TryGetValue(node.ID, out string? signalNamespace) == true &&
+                !string.IsNullOrWhiteSpace(signalNamespace)
+                    ? signalNamespace
+                    : string.IsNullOrEmpty(configuredNamespace) ? node.NameSpace : configuredNamespace;
             if (string.IsNullOrEmpty(ns) && node.NameSpaceID.HasValue &&
                 _OPCUAClient.GetNameSpace((ushort)node.NameSpaceID.Value, out string resolved)) ns = resolved;
             string? id = node.ID;
@@ -65,9 +77,15 @@ public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStarSimulation>
         await Task.Yield();
     }
 
-    private async Task PublishAsync(MechanicalSubOutputDataMudPulseTelemetry data, bool generated, CancellationToken token)
+    private async Task PublishAsync(MechanicalSubOutputData data, bool generated, CancellationToken token)
     {
-        await PublishOPCUAAsync(data, Configuration?.NameSpace, Configuration?.NodeIDPrefix, Configuration?.OPCUAIDs, token);
+        BaseStarSnapshot snapshot = BaseStarSnapshot.Capture(data);
+        HashSet<PropertyInfo> changed = snapshot.ChangesFrom(_lastPublished)
+            .Select(index => BaseStarSnapshot.Properties[index]).ToHashSet();
+        if (changed.Count == 0) return;
+        await PublishOPCUAAsync(data, Configuration?.NameSpace, Configuration?.NodeIDPrefix,
+            Configuration?.OPCUAIDs, token, changed.Contains);
+        _lastPublished = snapshot;
         Logger?.LogInformation("{Action} BaseStar simulation values: annulus pressure={Pressure:F0} Pa; maximum raw weight={Weight:F0} N",
             generated ? "Generated and published" : "Republished unchanged", data.AnnulusPressure?.Value, data.MaxRawWeight?.Value);
     }

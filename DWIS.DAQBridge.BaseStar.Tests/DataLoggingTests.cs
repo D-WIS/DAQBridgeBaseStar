@@ -13,7 +13,7 @@ namespace DWIS.DAQBridge.BaseStar.Tests;
 public class DataLoggingTests
 {
     private static readonly DateTimeOffset Start = new(2026, 10, 17, 0, 0, 0, TimeSpan.Zero);
-    private static MechanicalSubOutputDataMudPulseTelemetry Data(double value = 123.5) => new()
+    private static MechanicalSubOutputData Data(double value = 123.5) => new()
     {
         AnnulusPressure = new ScalarProperty { Value = value }, MaxRawWeight = new ScalarProperty { Value = 456.25 }
     };
@@ -32,7 +32,7 @@ public class DataLoggingTests
         Assert.Equal(snapshot, BaseStarSnapshot.ReadLast(entry.SchemaLine + "\n" + entry.RecordLine));
         using var record = JsonDocument.Parse(entry.RecordLine);
         Assert.Equal(new[] { "t", "v" }, record.RootElement.EnumerateObject().Select(p => p.Name));
-        Assert.Equal(26, record.RootElement.GetProperty("v").GetArrayLength());
+        Assert.Equal(52, record.RootElement.GetProperty("v").GetArrayLength());
         Assert.DoesNotContain("SparQL", entry.RecordLine);
         Assert.DoesNotContain("Manifest", entry.RecordLine);
         Assert.DoesNotContain("HasDynamicValue", entry.SchemaLine);
@@ -41,7 +41,7 @@ public class DataLoggingTests
     [Fact]
     public void NonFiniteValuesAreNotLoggedAsInvalidJsonOrPublished()
     {
-        var data = new MechanicalSubOutputDataMudPulseTelemetry { MaxRawWeight = new ScalarProperty { Value = double.NaN } };
+        var data = new MechanicalSubOutputData { MaxRawWeight = new ScalarProperty { Value = double.NaN } };
         var snapshot = BaseStarSnapshot.Capture(data);
         Assert.False(snapshot.HasValues);
         Assert.Empty(snapshot.ChangesFrom(null));
@@ -65,6 +65,21 @@ public class DataLoggingTests
         Assert.Equal(snapshot, BaseStarSnapshot.ReadLast(string.Join("\n", lines)));
         await writer.AppendAsync(BaseStarHistoryDataKind.Raw, Start.AddHours(6).ToOffset(TimeSpan.FromHours(2)), snapshot.ToEntry(Start.AddHours(6)));
         Assert.EndsWith("20261017T060000Z.jsonl", Assert.Single(Directory.GetFiles(temp.Path, "*.jsonl")));
+    }
+
+    [Fact]
+    public async Task V2ChunksDoNotMixWithAnExistingV1Chunk()
+    {
+        using var temp = new TemporaryDirectory();
+        string legacy = System.IO.Path.Combine(temp.Path, "basestar-raw-20261017T000000Z.jsonl");
+        await File.WriteAllTextAsync(legacy, "{\"type\":\"schema\",\"format\":\"basestar.values.v1\"}\n{\"v\":[]}\n");
+        var writer = new BaseStarDataLogWriter(temp.Path, TimeSpan.FromHours(6), 1024 * 1024);
+
+        await writer.AppendAsync(BaseStarHistoryDataKind.Raw, Start, BaseStarSnapshot.Capture(Data()).ToEntry(Start));
+
+        Assert.True(File.Exists(legacy));
+        string current = Assert.Single(Directory.GetFiles(temp.Path, "basestar-raw-v2-*.jsonl"));
+        Assert.Contains("\"format\":\"basestar.values.v2\"", await File.ReadAllTextAsync(current));
     }
 
     [Fact]
@@ -122,6 +137,21 @@ public class DataLoggingTests
         Assert.True(BaseStarBlackboardHistory.TryDeserialize(next, out var bucket));
         Assert.Equal(Start.AddHours(48), bucket!.BucketStartUtc);
         Assert.Equal(2, bucket.JsonLines.Split('\n', StringSplitOptions.RemoveEmptyEntries).Length);
+    }
+
+    [Fact]
+    public void HistoryStartsANewPayloadWhenTheSchemaChanges()
+    {
+        var entry = BaseStarSnapshot.Capture(Data()).ToEntry(Start);
+        var legacyEntry = entry with { SchemaLine = entry.SchemaLine.Replace("basestar.values.v2", "basestar.values.v1") };
+        string legacy = BaseStarBlackboardHistory.Append(null, Start, legacyEntry);
+
+        string upgraded = BaseStarBlackboardHistory.Append(legacy, Start.AddMinutes(1), entry);
+
+        Assert.True(BaseStarBlackboardHistory.TryDeserialize(upgraded, out var bucket));
+        string[] lines = bucket!.JsonLines.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        Assert.Equal(2, lines.Length);
+        Assert.Equal(entry.SchemaLine, lines[0].TrimEnd('\r'));
     }
 
     [Fact]
@@ -213,6 +243,31 @@ public class DataLoggingTests
         Assert.Equal("/home", config.DataLogDirectory);
         Assert.Equal(TimeSpan.FromHours(6), config.DataLogSegmentDuration);
         Assert.Equal(1024L * 1024 * 1024, config.MaximumDataLogStorageBytes);
+        Assert.Equal(TimeSpan.FromSeconds(30), config.MudPulsePublishInterval);
+        Assert.Equal(TimeSpan.FromSeconds(2.5), config.WiredPipePublishInterval);
+    }
+
+    [Fact]
+    public async Task MudPulseAndWiredPipeSignalsUseIndependentPublicationCadences()
+    {
+        using var temp = new TemporaryDirectory();
+        using var worker = new TestWorker(temp.Path);
+        var data = new MechanicalSubOutputData
+        {
+            AnnulusPressure = new ScalarProperty { Value = 100 },
+            AnnulusPressureWiredPipe = new ScalarProperty { Value = 100 }
+        };
+
+        await worker.SampleScheduled(data, Start);
+        data.AnnulusPressure.Value = 101;
+        data.AnnulusPressureWiredPipe.Value = 101;
+        await worker.SampleScheduled(data, Start.AddSeconds(3));
+        await worker.SampleScheduled(data, Start.AddSeconds(31));
+
+        Assert.Equal(new[]
+        {
+            "AnnulusPressure", "AnnulusPressureWiredPipe", "AnnulusPressureWiredPipe", "AnnulusPressure"
+        }, worker.Stub.WrittenSignals);
     }
 
     private sealed class TestWorker : Worker
@@ -235,13 +290,16 @@ public class DataLoggingTests
             _OPCUAClient = null;
             MaintainBlackboardHistory(time);
         }
-        public Task Sample(MechanicalSubOutputDataMudPulseTelemetry data, DateTimeOffset time) => ProcessSampleAsync(data, time, true, CancellationToken.None);
+        public Task Sample(MechanicalSubOutputData data, DateTimeOffset time) => ProcessSampleAsync(data, time, true, CancellationToken.None);
+        public Task SampleScheduled(MechanicalSubOutputData data, DateTimeOffset time) =>
+            ProcessSampleAsync(data, time, false, CancellationToken.None);
     }
 
     public class ClientStub : DispatchProxy
     {
         public Dictionary<string, string> History { get; } = new();
         public int SignalWrites { get; private set; }
+        public List<string> WrittenSignals { get; } = new();
         public bool Reject { get; set; }
         public bool RejectSignals { get; set; }
         protected override object? Invoke(MethodInfo? method, object?[]? args)
@@ -270,7 +328,9 @@ public class DataLoggingTests
                     return true;
                 case "UpdateAnyVariables":
                     if (RejectSignals) return false;
-                    SignalWrites += (((string, string, object, DateTime)[])args![0]!).Length;
+                    var writes = ((string, string, object, DateTime)[])args![0]!;
+                    SignalWrites += writes.Length;
+                    WrittenSignals.AddRange(writes.Select(write => write.Item2));
                     return true;
                 default: throw new NotSupportedException(method.Name);
             }

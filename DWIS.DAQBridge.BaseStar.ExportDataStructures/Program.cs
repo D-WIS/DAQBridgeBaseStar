@@ -11,7 +11,7 @@ internal static class Program
         if (args.Length > 1) throw new ArgumentException("Usage: ExportDataStructures [output-directory]");
         string directory = args.Length == 1 ? Path.GetFullPath(args[0]) : FindSchemaDirectory();
         Directory.CreateDirectory(directory);
-        var data = new MechanicalSubOutputDataMudPulseTelemetry();
+var data = new MechanicalSubOutputData();
         foreach (var (property, manifest) in data.Manifests.Value)
             File.WriteAllText(Path.Combine(directory, property.Name + "Manifest.json"),
                 JsonSerializer.Serialize(manifest) + "\n", new UTF8Encoding(false));

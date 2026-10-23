@@ -1,0 +1,44 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredMaxBitWeightWiredPipe
+WHERE {
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:HasDynamicValue ?BaseStarMeasuredMaxBitWeightWiredPipe .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?MovingMaxBaseStarMeasuredMaxBitWeightWiredPipe rdf:type ddhub:MovingMax .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:IsTransformationOutput ?MovingMaxBaseStarMeasuredMaxBitWeightWiredPipe .
+	?taringTransformationMaxWOBWiredPipe rdf:type ddhub:SummationTransformation .
+	?BaseStarMeasuredMaxRawWeightWiredPipe_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMaxRawWeightWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMaxRawWeightWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?BaseStarMeasuredMaxRawWeightWiredPipe_01 ddhub:IsTransformationInput ?taringTransformationMaxWOBWiredPipe .
+	?TareBitWeightForWiredPipeTelemetry_01 rdf:type ddhub:ProcessData .
+	?TareBitWeightForWiredPipeTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TareBitWeightForWiredPipeTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?TareBitWeightForWiredPipeTelemetry_01 ddhub:IsTransformationInput ?taringTransformationMaxWOBWiredPipe .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:IsTransformationOutput ?taringTransformationMaxWOBWiredPipe .
+	?GaussianUncertaintyBaseStarMeasuredMaxBitWeightWiredPipe_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredMaxBitWeightWiredPipe_01 .
+	?GaussianUncertaintyBaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredMaxBitWeightWiredPipe_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:IsTransmittedBy ?wiredPipeTelemetry .
+	?Bit_01 rdf:type ddhub:EndOfStringMechanicalLogicalElement .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:IsMechanicallyLocatedAt ?Bit_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?BaseStarMeasuredMaxBitWeightWiredPipe_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
+}

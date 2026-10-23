@@ -1,0 +1,44 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredMinBitTorqueWiredPipe
+WHERE {
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:HasDynamicValue ?BaseStarMeasuredMinBitTorqueWiredPipe .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?MovingMinBaseStarMeasuredMinBitTorqueWiredPipe rdf:type ddhub:MovingMin .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:IsTransformationOutput ?MovingMinBaseStarMeasuredMinBitTorqueWiredPipe .
+	?taringTransformationMinBitTorqueWiredPipe rdf:type ddhub:SummationTransformation .
+	?BaseStarMeasuredMinRawTorqueWiredPipe_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredMinRawTorqueWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredMinRawTorqueWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?BaseStarMeasuredMinRawTorqueWiredPipe_01 ddhub:IsTransformationInput ?taringTransformationMinBitTorqueWiredPipe .
+	?TorqueBiasForWiredPipeTelemetry_01 rdf:type ddhub:ProcessData .
+	?TorqueBiasForWiredPipeTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TorqueBiasForWiredPipeTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?TorqueBiasForWiredPipeTelemetry_01 ddhub:IsTransformationInput ?taringTransformationMinBitTorqueWiredPipe .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:IsTransformationOutput ?taringTransformationMinBitTorqueWiredPipe .
+	?GaussianUncertaintyBaseStarMeasuredMinBitTorqueWiredPipe_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredMinBitTorqueWiredPipe_01 .
+	?GaussianUncertaintyBaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredMinBitTorqueWiredPipe_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:IsTransmittedBy ?wiredPipeTelemetry .
+	?Bit_01 rdf:type ddhub:EndOfStringMechanicalLogicalElement .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:IsMechanicallyLocatedAt ?Bit_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?BaseStarMeasuredMinBitTorqueWiredPipe_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
+}

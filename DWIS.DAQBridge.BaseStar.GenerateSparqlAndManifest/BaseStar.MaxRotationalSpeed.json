@@ -58,6 +58,13 @@
       "Fields": null
     },
     {
+      "TypeDictionaryURI": "WiredPipeTelemetry",
+      "BrowseName": "wiredPipeTelemetry",
+      "UniqueName": "wiredPipeTelemetry",
+      "DisplayName": "wiredPipeTelemetry",
+      "Fields": null
+    },
+    {
       "TypeDictionaryURI": "BHAMechanicalLogicalElement",
       "BrowseName": "BHA#01",
       "UniqueName": "BHA#01",
@@ -69,6 +76,36 @@
       "BrowseName": "Halliburton#01",
       "UniqueName": "Halliburton#01",
       "DisplayName": "Halliburton#01",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "InstrumentModel",
+      "BrowseName": "baseStarModel",
+      "UniqueName": "baseStarModel",
+      "DisplayName": "baseStarModel",
+      "Fields": [
+        {
+          "FieldName": "ModelIdentifier",
+          "FieldValue": "Halliburton/BaseStar"
+        },
+        {
+          "FieldName": "ModelName",
+          "FieldValue": "BaseStar"
+        }
+      ]
+    },
+    {
+      "TypeDictionaryURI": "DrillingDataEcosystemOrganization",
+      "BrowseName": "halliburton",
+      "UniqueName": "halliburton",
+      "DisplayName": "halliburton",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "InstrumentInstance",
+      "BrowseName": "baseStarUnit",
+      "UniqueName": "baseStarUnit",
+      "DisplayName": "baseStarUnit",
       "Fields": null
     }
   ],
@@ -93,6 +130,17 @@
       "Object": {
         "NameSpace": "http://ddhub.no",
         "ID": "ContinuousDataType"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      },
+      "VerbURI": "http://ddhub.no/BelongsToClass",
+      "Object": {
+        "NameSpace": "http://ddhub.no",
+        "ID": "InstrumentedSub"
       }
     },
     {
@@ -237,6 +285,61 @@
         "NameSpace": "nodes",
         "ID": "Halliburton#01"
       }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarModel"
+      },
+      "VerbURI": "http://ddhub.no/HasManufacturer",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "halliburton"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      },
+      "VerbURI": "http://ddhub.no/IsOfInstrumentModel",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "baseStarModel"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      },
+      "VerbURI": "http://ddhub.no/SupportsTelemetry",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "mudPulseTelemetry"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      },
+      "VerbURI": "http://ddhub.no/SupportsTelemetry",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "wiredPipeTelemetry"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "BaseStarPeakRotationalSpeed#01"
+      },
+      "VerbURI": "http://ddhub.no/IsLocatedAtEquipment",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      }
     }
   ],
   "ProvidedVariables": [
@@ -244,7 +347,8 @@
       "VariableID": "BaseStarPeakRotationalSpeed",
       "Rank": 0,
       "Dimensions": null,
-      "DataType": "double"
+      "DataType": "double",
+      "InitialValue": ""
     }
   ],
   "InjectedVocabulary": null

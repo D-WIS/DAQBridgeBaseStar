@@ -9,7 +9,7 @@ public class SemanticContractTests
     [Fact]
     public void SharedRawRotationalSpeedIsConsistentlyDerived()
     {
-        var data = new MechanicalSubOutputDataMudPulseTelemetry();
+        var data = new MechanicalSubOutputData();
         foreach (string name in new[] { "AverageRotationalSpeed", "MaxRotationalSpeed", "StickSlipIndicator" })
         {
             var property = BaseStarSnapshot.Properties.Single(p => p.Name == name);
@@ -24,7 +24,7 @@ public class SemanticContractTests
     [Fact]
     public void MaxBitTorqueCorrectionUsesMaximumRawTorque()
     {
-        var data = new MechanicalSubOutputDataMudPulseTelemetry();
+        var data = new MechanicalSubOutputData();
         var property = BaseStarSnapshot.Properties.Single(p => p.Name == "MaxBitTorque");
         var manifest = data.Manifests.Value[property];
         Assert.Contains(manifest.InjectedReferences, r => r.Subject.ID == "BaseStarMeasuredMaxRawTorque#01" &&
@@ -36,11 +36,34 @@ public class SemanticContractTests
     }
 
     [Fact]
-    public void CheckedInExportsAndQueriesMatchRuntimeContractForAll26Signals()
+    public void TelemetryPairsHaveDistinctTransportAndSharedBaseStarIdentity()
+    {
+        var data = new MechanicalSubOutputData();
+        string[] mudPulseNames = BaseStarSnapshot.Properties.Select(p => p.Name)
+            .Where(n => !n.EndsWith("WiredPipe", StringComparison.Ordinal)).ToArray();
+        Assert.Equal(26, mudPulseNames.Length);
+        foreach (string mudPulseName in mudPulseNames)
+        {
+            var mudPulseProperty = BaseStarSnapshot.Properties.Single(p => p.Name == mudPulseName);
+            var wiredPipeProperty = BaseStarSnapshot.Properties.Single(p => p.Name == mudPulseName + "WiredPipe");
+            AssertTransportAndIdentity(data, mudPulseProperty, "MudPulseTelemetry", "mudPulseTelemetry");
+            AssertTransportAndIdentity(data, wiredPipeProperty, "WiredPipeTelemetry", "wiredPipeTelemetry");
+            Assert.NotEqual(data.Manifests.Value[mudPulseProperty].ProvidedVariables.Single().VariableID,
+                data.Manifests.Value[wiredPipeProperty].ProvidedVariables.Single().VariableID);
+
+            var mudNode = data.OPCUANodes.Value[mudPulseProperty];
+            var wiredNode = data.OPCUANodes.Value[wiredPipeProperty];
+            Assert.NotEqual(mudNode.NameSpace, wiredNode.NameSpace);
+            Assert.NotEqual(mudNode.ID, wiredNode.ID);
+        }
+    }
+
+    [Fact]
+    public void CheckedInExportsAndQueriesMatchRuntimeContractForAll52Signals()
     {
         var root = FindRepository();
-        var data = new MechanicalSubOutputDataMudPulseTelemetry();
-        Assert.Equal(26, data.Manifests.Value.Count);
+        var data = new MechanicalSubOutputData();
+        Assert.Equal(52, data.Manifests.Value.Count);
         foreach (var (property, manifest) in data.Manifests.Value)
         {
             Assert.Equal("BaseStarDataManifestDWISBridge", manifest.Provider.Name);
@@ -56,6 +79,33 @@ public class SemanticContractTests
             string queryPath = Path.Combine(root, "DWIS.DAQBridge.BaseStar.GenerateSparqlAndManifest", "BaseStar." + property.Name + ".sparql");
             Assert.Equal(Assert.Single(data.SparQLQueries.Value[property]).Value.SparQL!.Trim(), File.ReadAllText(queryPath).Trim());
         }
+    }
+
+    private static void AssertTransportAndIdentity(MechanicalSubOutputData data,
+        System.Reflection.PropertyInfo property, string telemetryType, string telemetryName)
+    {
+        var manifest = data.Manifests.Value[property];
+        var model = Assert.Single(manifest.InjectedNodes,
+            n => n.UniqueName == "baseStarModel" && n.TypeDictionaryURI == "InstrumentModel");
+        Assert.Contains(model.Fields!, field => field.FieldName == "ModelIdentifier" &&
+            field.FieldValue == "Halliburton/BaseStar");
+        Assert.Contains(model.Fields!, field => field.FieldName == "ModelName" && field.FieldValue == "BaseStar");
+        Assert.Contains(manifest.InjectedNodes, n => n.UniqueName == "baseStarUnit" && n.TypeDictionaryURI == "InstrumentInstance");
+        Assert.Contains(manifest.InjectedNodes, n => n.UniqueName == telemetryName && n.TypeDictionaryURI == telemetryType);
+        Assert.Contains(manifest.InjectedReferences, r => r.Subject.ID == "baseStarUnit" &&
+            r.VerbURI == "http://ddhub.no/IsOfInstrumentModel" && r.Object.ID == "baseStarModel");
+        Assert.Contains(manifest.InjectedReferences, r => r.VerbURI == "http://ddhub.no/IsTransmittedBy" &&
+            r.Object.ID == telemetryName);
+        Assert.Contains(manifest.InjectedReferences, r => r.VerbURI == "http://ddhub.no/IsLocatedAtEquipment" &&
+            r.Object.ID == "baseStarUnit");
+        Assert.Contains(manifest.InjectedReferences, r => r.Subject.ID == "baseStarUnit" &&
+            r.VerbURI == "http://ddhub.no/SupportsTelemetry" && r.Object.ID == "mudPulseTelemetry");
+        Assert.Contains(manifest.InjectedReferences, r => r.Subject.ID == "baseStarUnit" &&
+            r.VerbURI == "http://ddhub.no/SupportsTelemetry" && r.Object.ID == "wiredPipeTelemetry");
+        string query = Assert.Single(data.SparQLQueries.Value[property]).Value.SparQL!;
+        Assert.Contains("?baseStarModel rdf:type ddhub:InstrumentModel", query);
+        Assert.Contains("?baseStarModel ddhub:ModelIdentifier \"Halliburton/BaseStar\"^^<http://www.w3.org/2001/XMLSchema#string>", query);
+        Assert.Contains($"ddhub:IsTransmittedBy ?{telemetryName}", query);
     }
 
     private static string FindRepository()

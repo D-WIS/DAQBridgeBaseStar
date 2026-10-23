@@ -5,15 +5,17 @@ using DWIS.DAQBridge.BaseStar.Model;
 
 namespace DWIS.DAQBridge.BaseStar.Server
 {
-    public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStar>
+    public class Worker : DWISWorkerWithOPCUA<ConfigurationForBaseStar, object>
     {
-        private MechanicalSubOutputDataMudPulseTelemetry MechanicalSubData { get; set; } = new MechanicalSubOutputDataMudPulseTelemetry();
+    private MechanicalSubOutputData MechanicalSubData { get; set; } = new MechanicalSubOutputData();
 
         private BaseStarSnapshot? _lastPublished;
         private BaseStarSnapshot? _lastRawFile;
         private BaseStarSnapshot? _lastPublishedFile;
         private BaseStarSnapshot? _lastRawHistory;
         private BaseStarSnapshot? _lastPublishedHistory;
+        private DateTimeOffset? _lastMudPulsePublication;
+        private DateTimeOffset? _lastWiredPipePublication;
         private BaseStarDataLogWriter? _dataLogWriter;
         private string? _dataLogSettingsKey;
         private readonly BaseStarBlackboardHistoryPublisher _historyPublisher = new();
@@ -176,9 +178,11 @@ namespace DWIS.DAQBridge.BaseStar.Server
             }
             // Targets belong to the current Blackboard session and must be resolved again.
             PlaceHolders.Clear();
-            await RegisterToBlackboard(MechanicalSubData);
+            await RegisterToBlackboard(MechanicalSubData, false);
             // Re-synchronize live values once for the new session, but keep change-only file logs.
             _lastPublished = null;
+            _lastMudPulsePublication = null;
+            _lastWiredPipePublication = null;
             _historyInitialized = false;
             EnsureHistoryInitialized(DateTimeOffset.UtcNow);
         }
@@ -202,8 +206,6 @@ namespace DWIS.DAQBridge.BaseStar.Server
         protected override async Task Loop(CancellationToken stoppingToken)
         {
             using PeriodicTimer timer = new PeriodicTimer(OPCUALoopSpan);
-            int count = Math.Max(1, (int)(LoopSpan.TotalSeconds / OPCUALoopSpan.TotalSeconds));
-            int k = 0;
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
                 if (!ConnectionsAreEstablished)
@@ -217,10 +219,7 @@ namespace DWIS.DAQBridge.BaseStar.Server
                     {
                         return;
                     }
-                    k++;
-                    bool publishDue = k >= count;
-                    if (publishDue) k = 0;
-                    await ProcessSampleAsync(MechanicalSubData, DateTimeOffset.UtcNow, publishDue, stoppingToken);
+                    await ProcessSampleAsync(MechanicalSubData, DateTimeOffset.UtcNow, false, stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
@@ -236,6 +235,17 @@ namespace DWIS.DAQBridge.BaseStar.Server
                 }
                 ConfigurationUpdater<ConfigurationForBaseStar>.Instance.UpdateConfiguration(this);
             }
+        }
+
+        protected override string? GetNameSpace(OPCUANode node, string? configuredNameSpace)
+        {
+            if (!string.IsNullOrEmpty(node.ID) &&
+                Configuration?.OPCUANameSpaces?.TryGetValue(node.ID, out string? signalNameSpace) == true &&
+                !string.IsNullOrWhiteSpace(signalNameSpace))
+            {
+                return signalNameSpace;
+            }
+            return base.GetNameSpace(node, configuredNameSpace);
         }
 
         private void EnsureHistoryInitialized(DateTimeOffset nowUtc)
@@ -260,8 +270,8 @@ namespace DWIS.DAQBridge.BaseStar.Server
             if (_historyInitialized) _historyPublisher.Maintain(nowUtc);
         }
 
-        protected async Task ProcessSampleAsync(MechanicalSubOutputDataMudPulseTelemetry data,
-            DateTimeOffset timestampUtc, bool publishDue, CancellationToken stoppingToken)
+    protected async Task ProcessSampleAsync(MechanicalSubOutputData data,
+            DateTimeOffset timestampUtc, bool forcePublication, CancellationToken stoppingToken)
         {
             await MaintainFilesAsync(timestampUtc);
             MaintainBlackboardHistory(timestampUtc);
@@ -276,11 +286,20 @@ namespace DWIS.DAQBridge.BaseStar.Server
                 _lastRawHistory = snapshot;
             }
 
-            if (publishDue && snapshot.ChangesFrom(_lastPublished).Any())
+            bool mudPulseDue = forcePublication || IsDue(timestampUtc, _lastMudPulsePublication,
+                Configuration?.MudPulsePublishInterval, TimeSpan.FromSeconds(30));
+            bool wiredPipeDue = forcePublication || IsDue(timestampUtc, _lastWiredPipePublication,
+                Configuration?.WiredPipePublishInterval, TimeSpan.FromSeconds(2.5));
+            if (mudPulseDue) _lastMudPulsePublication = timestampUtc;
+            if (wiredPipeDue) _lastWiredPipePublication = timestampUtc;
+            int[] changes = snapshot.ChangesFrom(_lastPublished).Where(index =>
+                BaseStarSnapshot.Properties[index].Name.EndsWith("WiredPipe", StringComparison.Ordinal)
+                    ? wiredPipeDue : mudPulseDue).ToArray();
+            if (changes.Length > 0)
             {
-                await PublishBlackboardAsync(data, stoppingToken);
+                await PublishBlackboardChangesAsync(snapshot, changes, stoppingToken);
                 if (!ConnectionsAreEstablished) return;
-                _lastPublished = snapshot;
+                _lastPublished = BaseStarSnapshot.Merge(_lastPublished, snapshot, changes);
             }
             if (_lastPublished is null) return;
             if (!_lastPublished.Equals(_lastPublishedFile) &&
@@ -296,7 +315,15 @@ namespace DWIS.DAQBridge.BaseStar.Server
         protected override async Task PublishBlackboardAsync(DWISData data, CancellationToken stoppingToken)
         {
             BaseStarSnapshot snapshot = BaseStarSnapshot.Capture(data);
-            foreach (int index in snapshot.ChangesFrom(_lastPublished))
+            int[] changes = snapshot.ChangesFrom(_lastPublished).ToArray();
+            await PublishBlackboardChangesAsync(snapshot, changes, stoppingToken);
+            _lastPublished = BaseStarSnapshot.Merge(_lastPublished, snapshot, changes);
+        }
+
+        protected virtual async Task PublishBlackboardChangesAsync(BaseStarSnapshot snapshot, IEnumerable<int> changes,
+            CancellationToken stoppingToken)
+        {
+            foreach (int index in changes)
             {
                 stoppingToken.ThrowIfCancellationRequested();
                 var property = BaseStarSnapshot.Properties[index];
@@ -304,7 +331,12 @@ namespace DWIS.DAQBridge.BaseStar.Server
                     throw new InvalidOperationException($"Could not publish BaseStar signal '{property.Name}'.");
                 await Task.Yield();
             }
-            _lastPublished = snapshot;
+        }
+
+        private static bool IsDue(DateTimeOffset now, DateTimeOffset? previous, TimeSpan? configured, TimeSpan fallback)
+        {
+            TimeSpan interval = configured > TimeSpan.Zero ? configured.Value : fallback;
+            return previous is null || now - previous.Value >= interval;
         }
 
         private BaseStarDataLogWriter? GetDataLogWriter()

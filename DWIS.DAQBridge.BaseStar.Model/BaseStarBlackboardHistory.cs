@@ -45,7 +45,8 @@ public static class BaseStarBlackboardHistory
         string jsonLines;
         if (TryDeserialize(existingPayload, out BaseStarHistoryBucketPayload? existing) &&
             existing is not null &&
-            existing.BucketStartUtc == bucketStart)
+            existing.BucketStartUtc == bucketStart &&
+            existing.JsonLines.Split('\n', 2)[0].TrimEnd('\r') == entry.SchemaLine)
         {
             jsonLines = existing.JsonLines.TrimEnd('\r', '\n') + Environment.NewLine + entry.RecordLine + Environment.NewLine;
         }

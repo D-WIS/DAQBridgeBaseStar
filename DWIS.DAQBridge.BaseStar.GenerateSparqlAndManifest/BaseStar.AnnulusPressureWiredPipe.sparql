@@ -1,0 +1,38 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredAnnulusPressureWiredPipe
+WHERE {
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:HasDynamicValue ?BaseStarMeasuredAnnulusPressureWiredPipe .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:pressureDrilling .
+	?MovingAverageBaseStarMeasuredAnnulusPressureWiredPipe rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredAnnulusPressureWiredPipe .
+	?GaussianUncertaintyBaseStarMeasuredAnnulusPressureWiredPipe_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredAnnulusPressureWiredPipe_01 .
+	?GaussianUncertaintyBaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredAnnulusPressureWiredPipe_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:IsTransmittedBy ?wiredPipeTelemetry .
+	?annulusOutletJunction_01 rdf:type ddhub:AnnulusOutletJunction .
+	?outletHydraulicBranch_01 rdf:type ddhub:HydraulicBranch .
+	?annulusOutletJunction_01 ddhub:HasUpstreamBranch ?outletHydraulicBranch_01 .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:IsAssociatedToHydraulicBranch ?outletHydraulicBranch_01 .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?BaseStarMeasuredAnnulusPressureWiredPipe_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
+}

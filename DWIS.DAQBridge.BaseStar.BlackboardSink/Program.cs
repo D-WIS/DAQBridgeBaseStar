@@ -1,7 +1,2 @@
-using DWIS.DAQBridge.BaseStar.BlackboardSink;
-
-var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
-
-var host = builder.Build();
-host.Run();
+using DWIS.RigOS.DownholeMechanical.Bridge;
+await RuntimeHost.RunAsync(args, "BaseStar", "BlackboardSink");

@@ -28,7 +28,7 @@ public sealed class BaseStarDataLogWriter
         {
             Directory.CreateDirectory(_directory);
             DateTimeOffset start = SegmentStart(timestampUtc);
-            string path = Path.Combine(_directory, $"basestar-{kind.ToString().ToLowerInvariant()}-{start:yyyyMMddTHHmmssZ}.jsonl");
+            string path = Path.Combine(_directory, $"basestar-{kind.ToString().ToLowerInvariant()}-v2-{start:yyyyMMddTHHmmssZ}.jsonl");
             // A late timestamp must not overwrite records already archived for this segment.
             string zipPath = Path.ChangeExtension(path, ".zip");
             if (!File.Exists(path) && File.Exists(zipPath))
@@ -98,7 +98,9 @@ public sealed class BaseStarDataLogWriter
     private static DateTimeOffset? ParseStart(string name)
     {
         string stem = Path.GetFileNameWithoutExtension(name);
-        string? suffix = stem.StartsWith("basestar-raw-", StringComparison.Ordinal) ? stem[13..]
+        string? suffix = stem.StartsWith("basestar-raw-v2-", StringComparison.Ordinal) ? stem[16..]
+            : stem.StartsWith("basestar-published-v2-", StringComparison.Ordinal) ? stem[22..]
+            : stem.StartsWith("basestar-raw-", StringComparison.Ordinal) ? stem[13..]
             : stem.StartsWith("basestar-published-", StringComparison.Ordinal) ? stem[19..] : null;
         return suffix is not null && DateTimeOffset.TryParseExact(suffix, "yyyyMMddTHHmmssZ", CultureInfo.InvariantCulture,
             DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var start) ? start : null;

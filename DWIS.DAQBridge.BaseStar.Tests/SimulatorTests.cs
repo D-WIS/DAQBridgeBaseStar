@@ -27,8 +27,8 @@ public class SimulatorTests
         Assert.Equal(new BaseStarSimulationStep(true, true), simulator.Tick(TimeSpan.Zero));
         var baseline = BaseStarSnapshot.Capture(simulator.Data);
         Assert.Equal(new BaseStarSimulationStep(false, false), simulator.Tick(TimeSpan.FromSeconds(1)));
-        Assert.Equal(new BaseStarSimulationStep(false, true), simulator.Tick(TimeSpan.FromSeconds(5)));
-        Assert.Equal(baseline, BaseStarSnapshot.Capture(simulator.Data));
+        Assert.Equal(new BaseStarSimulationStep(true, true), simulator.Tick(TimeSpan.FromSeconds(5)));
+        Assert.NotEqual(baseline, BaseStarSnapshot.Capture(simulator.Data));
         Assert.Equal(new BaseStarSimulationStep(false, false), simulator.Tick(TimeSpan.FromSeconds(5.1)));
     }
 
@@ -68,23 +68,24 @@ public class SimulatorTests
             OPCUALoopDuration = TimeSpan.FromSeconds(seconds),
             SimulationConditionGenerationPeriod = TimeSpan.FromSeconds(seconds),
             SimulationDataGenerationPeriod = TimeSpan.FromSeconds(seconds),
+            SimulationWiredPipeDataGenerationPeriod = TimeSpan.FromSeconds(seconds),
             SimulationOPCUAPublishPeriod = TimeSpan.FromSeconds(seconds)
         });
         Assert.Equal(TimeSpan.FromSeconds(1), simulator.TickPeriod);
         simulator.Tick(TimeSpan.Zero);
-        Assert.Equal(new BaseStarSimulationStep(false, true), simulator.Tick(TimeSpan.FromSeconds(5)));
+        Assert.Equal(new BaseStarSimulationStep(true, true), simulator.Tick(TimeSpan.FromSeconds(5)));
         Assert.Equal(new BaseStarSimulationStep(true, true), simulator.Tick(TimeSpan.FromSeconds(10)));
     }
 
     [Fact]
-    public void All26SignalsAreFiniteSiValuesWithCoherentStatisticsAndOffsets()
+    public void All52TelemetrySignalsAreFiniteSiValuesWithCoherentStatisticsAndOffsets()
     {
         var simulator = new BaseStarSimulator(new());
         for (int seconds = 0; seconds < 3600; seconds += 30)
         {
             simulator.Tick(TimeSpan.FromSeconds(seconds));
             var data = simulator.Data;
-            Assert.Equal(26, BaseStarSnapshot.Properties.Count);
+            Assert.Equal(52, BaseStarSnapshot.Properties.Count);
             Assert.All(BaseStarSnapshot.Properties, p =>
             {
                 var scalar = Assert.IsType<DWIS.RigOS.Common.Worker.ScalarProperty>(p.GetValue(data));
@@ -105,6 +106,11 @@ public class SimulatorTests
             Assert.Equal(data.MaxCorrectedTorque.Value, data.MaxBitTorque!.Value);
             Assert.True(data.StringPressure!.Value > data.AnnulusPressure!.Value);
             Assert.InRange(data.ElectronicTemperature!.Value!.Value, 339, 347);
+            Assert.True(data.MinRawWeightWiredPipe!.Value <= data.AverageRawWeightWiredPipe!.Value &&
+                data.AverageRawWeightWiredPipe.Value <= data.MaxRawWeightWiredPipe!.Value);
+            Assert.Equal(data.AverageRawWeightWiredPipe.Value + data.TareBitWeightWiredPipe!.Value,
+                data.AverageBitWeightWiredPipe!.Value);
+            if (seconds > 0) Assert.NotEqual(data.MaxRawWeight.Value, data.MaxRawWeightWiredPipe.Value);
         }
     }
 

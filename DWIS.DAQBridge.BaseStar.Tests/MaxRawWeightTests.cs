@@ -18,8 +18,8 @@ public class MaxRawWeightTests
     [Fact]
     public void MaxRawWeightCreatesSemanticScalarWithExistingDoubleContract()
     {
-        var data = new MechanicalSubOutputDataMudPulseTelemetry();
-        var property = typeof(MechanicalSubOutputDataMudPulseTelemetry).GetProperty(nameof(data.MaxRawWeight))!;
+        var data = new MechanicalSubOutputData();
+        var property = typeof(MechanicalSubOutputData).GetProperty(nameof(data.MaxRawWeight))!;
         data.CreateProperty(property);
         var scalar = Assert.IsType<ScalarProperty>(data.MaxRawWeight);
         Assert.NotNull(scalar.Manifest);
@@ -34,7 +34,7 @@ public class MaxRawWeightTests
     {
         using var worker = new SourceWorker();
         var client = worker.SetClient();
-        var data = new MechanicalSubOutputDataMudPulseTelemetry();
+        var data = new MechanicalSubOutputData();
         worker.Generate(data);
         Assert.NotNull(data.MaxRawWeight?.Value);
         double expected = data.MaxRawWeight.Value.Value;
@@ -51,7 +51,7 @@ public class MaxRawWeightTests
         {
             UnitConversions = new() { [InputID] = new() { ConversionFactor = 2, ConversionOffset = 2 } }
         };
-        var data = new MechanicalSubOutputDataMudPulseTelemetry { MaxRawWeight = new ScalarProperty { Value = 12345.5 } };
+        var data = new MechanicalSubOutputData { MaxRawWeight = new ScalarProperty { Value = 12345.5 } };
         await worker.Publish(data);
         Assert.Equal(24693, client.Writes[(InputNamespace, InputID)]);
         Assert.Equal(12345.5, data.MaxRawWeight.Value);
@@ -65,7 +65,29 @@ public class MaxRawWeightTests
         var client = worker.SetClient();
         client.Reject = true;
         await Assert.ThrowsAsync<InvalidOperationException>(() => worker.Publish(
-            new MechanicalSubOutputDataMudPulseTelemetry { MaxRawWeight = new ScalarProperty { Value = 1 } }));
+            new MechanicalSubOutputData { MaxRawWeight = new ScalarProperty { Value = 1 } }));
+    }
+
+    [Fact]
+    public async Task WiredPipeSignalCanUseIndependentNamespaceAndNodeId()
+    {
+        using var worker = new SourceWorker();
+        var client = worker.SetClient();
+        worker.Configuration = new ConfigurationForBaseStarSimulation
+        {
+            NameSpace = "urn:fallback",
+            NodeIDPrefix = string.Empty,
+            OPCUANameSpaces = new() { ["MaxRawWeightWiredPipe"] = "urn:basestar:wired-weight" },
+            OPCUAIDs = new() { ["MaxRawWeightWiredPipe"] = "vendor/tag/weight/max" }
+        };
+        var data = new MechanicalSubOutputData
+        {
+            MaxRawWeightWiredPipe = new ScalarProperty { Value = 9876.5 }
+        };
+
+        await worker.PublishConfigured(data);
+
+        Assert.Equal(9876.5, client.Writes[("urn:basestar:wired-weight", "vendor/tag/weight/max")]);
     }
 
     [Theory]
@@ -78,7 +100,7 @@ public class MaxRawWeightTests
         var source = worker.SetInput();
         source.Input = input;
         var blackboard = worker.SetBlackboard();
-        var data = new MechanicalSubOutputDataMudPulseTelemetry();
+        var data = new MechanicalSubOutputData();
         await worker.Register(data);
         Assert.True(worker.HasMaxRawWeightTarget);
         await worker.Read(data, new Dictionary<string, UnitConversion>
@@ -98,9 +120,12 @@ public class MaxRawWeightTests
             _OPCUAClient = DispatchProxy.Create<IOPCUADWISClient, ClientStub>();
             return (ClientStub)_OPCUAClient;
         }
-        public void Generate(MechanicalSubOutputDataMudPulseTelemetry data) => FillRandomData(data);
-        public Task Publish(MechanicalSubOutputDataMudPulseTelemetry data) =>
+        public void Generate(MechanicalSubOutputData data) => FillRandomData(data);
+        public Task Publish(MechanicalSubOutputData data) =>
             PublishOPCUAAsync(data, null, null, null, CancellationToken.None);
+        public Task PublishConfigured(MechanicalSubOutputData data) =>
+            PublishOPCUAAsync(data, Configuration?.NameSpace, Configuration?.NodeIDPrefix,
+                Configuration?.OPCUAIDs, CancellationToken.None);
     }
 
     private sealed class ServerWorker : Worker
@@ -117,10 +142,10 @@ public class MaxRawWeightTests
             _DWISClient = DispatchProxy.Create<IOPCUADWISClient, ClientStub>();
             return (ClientStub)_DWISClient;
         }
-        public Task Register(MechanicalSubOutputDataMudPulseTelemetry data) => RegisterToBlackboard(data);
-        public Task Read(MechanicalSubOutputDataMudPulseTelemetry data, Dictionary<string, UnitConversion> conversions) =>
+        public Task Register(MechanicalSubOutputData data) => RegisterToBlackboard(data, false);
+        public Task Read(MechanicalSubOutputData data, Dictionary<string, UnitConversion> conversions) =>
             ReadOPCUA(data, null, null, null, conversions);
-        public Task Publish(MechanicalSubOutputDataMudPulseTelemetry data) => PublishBlackboardAsync(data, CancellationToken.None);
+        public Task Publish(MechanicalSubOutputData data) => PublishBlackboardAsync(data, CancellationToken.None);
     }
 
     public class ClientStub : DispatchProxy

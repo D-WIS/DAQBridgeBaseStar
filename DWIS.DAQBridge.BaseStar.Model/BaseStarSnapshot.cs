@@ -8,7 +8,7 @@ namespace DWIS.DAQBridge.BaseStar.Model;
 public sealed class BaseStarSnapshot : IEquatable<BaseStarSnapshot>
 {
     public static IReadOnlyList<PropertyInfo> Properties { get; } = Array.AsReadOnly(
-        typeof(MechanicalSubOutputDataMudPulseTelemetry).GetProperties()
+        typeof(MechanicalSubOutputData).GetProperties()
             .Where(p => p.PropertyType == typeof(ScalarProperty)).OrderBy(p => p.MetadataToken).ToArray());
     private readonly double?[] _values;
     private BaseStarSnapshot(double?[] values) => _values = values;
@@ -21,8 +21,14 @@ public sealed class BaseStarSnapshot : IEquatable<BaseStarSnapshot>
     }).ToArray());
     public IEnumerable<int> ChangesFrom(BaseStarSnapshot? previous) => Enumerable.Range(0, _values.Length)
         .Where(i => _values[i].HasValue && (previous is null || _values[i] != previous._values[i]));
+    public static BaseStarSnapshot Merge(BaseStarSnapshot? previous, BaseStarSnapshot source, IEnumerable<int> indexes)
+    {
+        double?[] values = previous is null ? new double?[Properties.Count] : (double?[])previous._values.Clone();
+        foreach (int index in indexes) values[index] = source._values[index];
+        return new(values);
+    }
     public BaseStarLogEntry ToEntry(DateTimeOffset timestampUtc) => new(
-        JsonSerializer.Serialize(new { type = "schema", format = "basestar.values.v1", units = "SI",
+        JsonSerializer.Serialize(new { type = "schema", format = "basestar.values.v2", units = "SI",
             fields = Properties.Select(p => p.Name).ToArray() }),
         JsonSerializer.Serialize(new { t = timestampUtc.ToUniversalTime(), v = _values }));
     public static BaseStarSnapshot? ReadLast(string jsonLines)
@@ -32,7 +38,7 @@ public sealed class BaseStarSnapshot : IEquatable<BaseStarSnapshot>
             string[] lines = jsonLines.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (lines.Length < 2) return null;
             using var schema = JsonDocument.Parse(lines[0]);
-            if (schema.RootElement.GetProperty("format").GetString() != "basestar.values.v1" ||
+            if (schema.RootElement.GetProperty("format").GetString() != "basestar.values.v2" ||
                 !schema.RootElement.GetProperty("fields").EnumerateArray().Select(v => v.GetString())
                     .SequenceEqual(Properties.Select(p => p.Name))) return null;
             using var record = JsonDocument.Parse(lines[^1]);

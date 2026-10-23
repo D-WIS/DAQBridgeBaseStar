@@ -2,6 +2,7 @@
   "OPCUAURL": "opc.tcp://localhost:48031",
   "OPCUALoopDuration": "00:00:01",
   "NameSpace": null,
+  "OPCUANameSpaces": null,
   "NodeIDPrefix": null,
   "OPCUAIDs": null,
   "UnitConversions": null,
@@ -12,8 +13,11 @@
   "DataLogSegmentDuration": "06:00:00",
   "MaximumDataLogStorageBytes": 1073741824,
   "EnableBlackboardHistory": true,
+  "MudPulsePublishInterval": "00:00:30",
+  "WiredPipePublishInterval": "00:00:02.500",
   "SimulationSeed": 20261017,
   "SimulationConditionGenerationPeriod": "00:00:10",
   "SimulationDataGenerationPeriod": "00:00:30",
+  "SimulationWiredPipeDataGenerationPeriod": "00:00:02.500",
   "SimulationOPCUAPublishPeriod": "00:00:05"
 }

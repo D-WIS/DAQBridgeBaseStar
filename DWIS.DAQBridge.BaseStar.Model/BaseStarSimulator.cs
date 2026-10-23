@@ -8,12 +8,14 @@ public sealed class BaseStarSimulator
     private readonly int _seed;
     private readonly TimeSpan _conditionPeriod;
     private readonly TimeSpan _dataPeriod;
+    private readonly TimeSpan _wiredPipeDataPeriod;
     private readonly TimeSpan _publishPeriod;
     private long _conditionIndex = -1;
     private long _dataIndex = -1;
+    private long _wiredPipeDataIndex = -1;
     private long _publishIndex = -1;
 
-    public MechanicalSubOutputDataMudPulseTelemetry Data { get; } = new();
+    public MechanicalSubOutputData Data { get; } = new();
     public TimeSpan TickPeriod { get; }
 
     public BaseStarSimulator(ConfigurationForBaseStarSimulation configuration)
@@ -22,8 +24,9 @@ public sealed class BaseStarSimulator
         _seed = configuration.SimulationSeed;
         _conditionPeriod = Positive(configuration.SimulationConditionGenerationPeriod, TimeSpan.FromSeconds(10));
         _dataPeriod = Positive(configuration.SimulationDataGenerationPeriod, TimeSpan.FromSeconds(30));
+        _wiredPipeDataPeriod = Positive(configuration.SimulationWiredPipeDataGenerationPeriod, TimeSpan.FromSeconds(2.5));
         _publishPeriod = Positive(configuration.SimulationOPCUAPublishPeriod, TimeSpan.FromSeconds(5));
-        TickPeriod = new[] { _conditionPeriod, _dataPeriod, _publishPeriod,
+        TickPeriod = new[] { _conditionPeriod, _dataPeriod, _wiredPipeDataPeriod, _publishPeriod,
             Positive(configuration.OPCUALoopDuration, TimeSpan.FromSeconds(1)), TimeSpan.FromSeconds(1) }.Min();
         foreach (var property in BaseStarSnapshot.Properties) Data.CreateProperty(property);
     }
@@ -33,6 +36,7 @@ public sealed class BaseStarSimulator
         ArgumentOutOfRangeException.ThrowIfLessThan(elapsed, TimeSpan.Zero);
         long conditionIndex = elapsed.Ticks / _conditionPeriod.Ticks;
         long dataIndex = elapsed.Ticks / _dataPeriod.Ticks;
+        long wiredPipeDataIndex = elapsed.Ticks / _wiredPipeDataPeriod.Ticks;
         long publishIndex = elapsed.Ticks / _publishPeriod.Ticks;
         bool generated = false;
         if (conditionIndex != _conditionIndex)
@@ -47,6 +51,12 @@ public sealed class BaseStarSimulator
             _dataIndex = dataIndex;
             generated = true;
         }
+        if (wiredPipeDataIndex != _wiredPipeDataIndex)
+        {
+            GenerateWiredPipeSample(wiredPipeDataIndex, wiredPipeDataIndex * _wiredPipeDataPeriod.TotalSeconds);
+            _wiredPipeDataIndex = wiredPipeDataIndex;
+            generated = true;
+        }
         bool publish = generated || publishIndex != _publishIndex;
         _publishIndex = publishIndex;
         return new(generated, publish);
@@ -55,6 +65,31 @@ public sealed class BaseStarSimulator
     private Random Sequence(long index, int stream) => new(unchecked(_seed * 397 ^ (int)index * 7919 ^ (int)(index >> 32) ^ stream));
     private static TimeSpan Positive(TimeSpan value, TimeSpan fallback) => value > TimeSpan.Zero ? value : fallback;
     private static void Set(ScalarProperty? property, double value) => property!.Value = value;
+
+    private void CopyMudPulseValuesToWiredPipe()
+    {
+        foreach (var wiredProperty in BaseStarSnapshot.Properties.Where(p => p.Name.EndsWith("WiredPipe", StringComparison.Ordinal)))
+        {
+            string mudPulseName = wiredProperty.Name[..^"WiredPipe".Length];
+            var mudPulseProperty = typeof(MechanicalSubOutputData).GetProperty(mudPulseName)!;
+            var source = (ScalarProperty?)mudPulseProperty.GetValue(Data);
+            var destination = (ScalarProperty?)wiredProperty.GetValue(Data);
+            destination!.Value = source!.Value;
+        }
+    }
+
+    private void GenerateWiredPipeSample(long index, double seconds)
+    {
+        var mudPulseProperties = BaseStarSnapshot.Properties
+            .Where(p => !p.Name.EndsWith("WiredPipe", StringComparison.Ordinal)).ToArray();
+        double?[] preserved = mudPulseProperties
+            .Select(property => ((ScalarProperty?)property.GetValue(Data))?.Value).ToArray();
+        FillConditions(index, seconds);
+        FillDynamics(index, seconds);
+        CopyMudPulseValuesToWiredPipe();
+        for (int i = 0; i < mudPulseProperties.Length; i++)
+            ((ScalarProperty)mudPulseProperties[i].GetValue(Data)!).Value = preserved[i];
+    }
 
     private void FillConditions(long index, double seconds)
     {

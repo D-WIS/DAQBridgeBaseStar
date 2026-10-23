@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,7 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DWIS.RigOS.Common.Worker" Version="1.0.5-build.429" />
+    <PackageReference Include="DWIS.RigOS.Common.Worker" Version="1.0.7" />
+    <PackageReference Include="DWIS.Client.ReferenceImplementation.OPCFoundation" Version="2.2.54" />
+    <PackageReference Include="OSDC.DotnetLibraries.Drilling.DrillingProperties" Version="10.2.11" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,4 +27,5 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup><ProjectReference Include="../../Common/DWIS.RigOS.Contracts.DownholeMechanical/DWIS.RigOS.Contracts.DownholeMechanical.csproj" /></ItemGroup>
 </Project>

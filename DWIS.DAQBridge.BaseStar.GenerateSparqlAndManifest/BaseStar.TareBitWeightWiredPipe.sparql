@@ -1,0 +1,29 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?TareBitWeightForMudPulseTelemetry
+WHERE {
+	?TareBitWeightForMudPulseTelemetry_01 rdf:type ddhub:ProcessData .
+	?TareBitWeightForMudPulseTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:HasDynamicValue ?TareBitWeightForMudPulseTelemetry .
+	?TareBitWeightForMudPulseTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:weightOnBitDrilling .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
+	?TareBitWeightForWiredPipeTelemetry_01 ddhub:IsTransmittedBy ?wiredPipeTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?TareBitWeightForWiredPipeTelemetry_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?TareBitWeightForWiredPipeTelemetry_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?TareBitWeightForWiredPipeTelemetry_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
+}

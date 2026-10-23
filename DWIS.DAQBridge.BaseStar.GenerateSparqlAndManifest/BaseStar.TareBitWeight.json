@@ -17,9 +17,9 @@
   "InjectedNodes": [
     {
       "TypeDictionaryURI": "ProcessData",
-      "BrowseName": "TareBitWeightForMudPulseTelemetry#01",
-      "UniqueName": "TareBitWeightForMudPulseTelemetry#01",
-      "DisplayName": "TareBitWeightForMudPulseTelemetry#01",
+      "BrowseName": "TareBitWeightForWiredPipeTelemetry#01",
+      "UniqueName": "TareBitWeightForWiredPipeTelemetry#01",
+      "DisplayName": "TareBitWeightForWiredPipeTelemetry#01",
       "Fields": null
     },
     {
@@ -27,6 +27,13 @@
       "BrowseName": "mudPulseTelemetry",
       "UniqueName": "mudPulseTelemetry",
       "DisplayName": "mudPulseTelemetry",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "WiredPipeTelemetry",
+      "BrowseName": "wiredPipeTelemetry",
+      "UniqueName": "wiredPipeTelemetry",
+      "DisplayName": "wiredPipeTelemetry",
       "Fields": null
     },
     {
@@ -42,13 +49,43 @@
       "UniqueName": "Halliburton#01",
       "DisplayName": "Halliburton#01",
       "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "InstrumentModel",
+      "BrowseName": "baseStarModel",
+      "UniqueName": "baseStarModel",
+      "DisplayName": "baseStarModel",
+      "Fields": [
+        {
+          "FieldName": "ModelIdentifier",
+          "FieldValue": "Halliburton/BaseStar"
+        },
+        {
+          "FieldName": "ModelName",
+          "FieldValue": "BaseStar"
+        }
+      ]
+    },
+    {
+      "TypeDictionaryURI": "DrillingDataEcosystemOrganization",
+      "BrowseName": "halliburton",
+      "UniqueName": "halliburton",
+      "DisplayName": "halliburton",
+      "Fields": null
+    },
+    {
+      "TypeDictionaryURI": "InstrumentInstance",
+      "BrowseName": "baseStarUnit",
+      "UniqueName": "baseStarUnit",
+      "DisplayName": "baseStarUnit",
+      "Fields": null
     }
   ],
   "InjectedReferences": [
     {
       "Subject": {
         "NameSpace": "nodes",
-        "ID": "TareBitWeightForMudPulseTelemetry#01"
+        "ID": "TareBitWeightForWiredPipeTelemetry#01"
       },
       "VerbURI": "http://ddhub.no/BelongsToClass",
       "Object": {
@@ -59,18 +96,29 @@
     {
       "Subject": {
         "NameSpace": "nodes",
-        "ID": "TareBitWeightForMudPulseTelemetry#01"
+        "ID": "baseStarUnit"
       },
-      "VerbURI": "http://ddhub.no/HasDynamicValue",
+      "VerbURI": "http://ddhub.no/BelongsToClass",
       "Object": {
-        "NameSpace": "providedNodes",
-        "ID": "TareBitWeightForMudPulseTelemetry"
+        "NameSpace": "http://ddhub.no",
+        "ID": "InstrumentedSub"
       }
     },
     {
       "Subject": {
         "NameSpace": "nodes",
-        "ID": "TareBitWeightForMudPulseTelemetry#01"
+        "ID": "TareBitWeightForWiredPipeTelemetry#01"
+      },
+      "VerbURI": "http://ddhub.no/HasDynamicValue",
+      "Object": {
+        "NameSpace": "providedNodes",
+        "ID": "TareBitWeightForWiredPipeTelemetry"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "TareBitWeightForWiredPipeTelemetry#01"
       },
       "VerbURI": "http://ddhub.no/IsOfMeasurableQuantity",
       "Object": {
@@ -110,14 +158,70 @@
         "NameSpace": "nodes",
         "ID": "Halliburton#01"
       }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarModel"
+      },
+      "VerbURI": "http://ddhub.no/HasManufacturer",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "halliburton"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      },
+      "VerbURI": "http://ddhub.no/IsOfInstrumentModel",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "baseStarModel"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      },
+      "VerbURI": "http://ddhub.no/SupportsTelemetry",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "mudPulseTelemetry"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      },
+      "VerbURI": "http://ddhub.no/SupportsTelemetry",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "wiredPipeTelemetry"
+      }
+    },
+    {
+      "Subject": {
+        "NameSpace": "nodes",
+        "ID": "TareBitWeightForMudPulseTelemetry#01"
+      },
+      "VerbURI": "http://ddhub.no/IsLocatedAtEquipment",
+      "Object": {
+        "NameSpace": "nodes",
+        "ID": "baseStarUnit"
+      }
     }
   ],
   "ProvidedVariables": [
     {
-      "VariableID": "TareBitWeightForMudPulseTelemetry",
+      "VariableID": "TareBitWeightForWiredPipeTelemetry",
       "Rank": 0,
       "Dimensions": null,
-      "DataType": "double"
+      "DataType": "double",
+      "InitialValue": ""
     }
   ],
   "InjectedVocabulary": null

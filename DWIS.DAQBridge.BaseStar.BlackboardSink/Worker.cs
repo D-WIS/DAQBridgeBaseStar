@@ -5,9 +5,9 @@ using System.Reflection;
 
 namespace DWIS.DAQBridge.BaseStar.BlackboardSink
 {
-    public class Worker : DWISWorker<Configuration>
+    public class Worker : DWISWorker<Configuration, object>
     {
-        private MechanicalSubOutputDataMudPulseTelemetry MechanicalSubData { get; set; } = new MechanicalSubOutputDataMudPulseTelemetry();
+    private MechanicalSubOutputData MechanicalSubData { get; set; } = new MechanicalSubOutputData();
 
         public Worker(ILogger<IDWISWorker<Configuration>> logger, ILogger<DWISClientOPCF>? loggerDWISClient) : base(logger, loggerDWISClient)
         {

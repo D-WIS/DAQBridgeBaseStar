@@ -15,8 +15,8 @@ internal static class Program
         string directory = args.Length == 1 ? Path.GetFullPath(args[0]) : FindProjectDirectory();
         if (args.Length > 1) throw new ArgumentException("Usage: GenerateSparqlAndManifest [output-directory]");
         Directory.CreateDirectory(directory);
-        var data = new MechanicalSubOutputDataMudPulseTelemetry();
-        using var documentation = new StreamWriter(Path.Combine(directory, "MechanicalSubOutputDataMudPulseTelemetry.md"), false, Utf8);
+var data = new MechanicalSubOutputData();
+using var documentation = new StreamWriter(Path.Combine(directory, "MechanicalSubOutputData.md"), false, Utf8);
         documentation.WriteLine("# BaseStar signal manifests and discovery queries");
         documentation.WriteLine();
         documentation.WriteLine("Generated from the model's runtime manifests and query sets. Do not edit directly.");

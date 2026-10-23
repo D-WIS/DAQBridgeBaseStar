@@ -1,5 +1,6 @@
 using System.Reflection;
 using DWIS.Client.ReferenceImplementation;
+using DWIS.DAQBridge.BaseStar.Model;
 using DWIS.DAQBridge.BaseStar.Server;
 using DWIS.RigOS.Common.Worker;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -123,7 +124,8 @@ public class RecoveryTests
             blackboard.Connected = blackboardConnected;
             return opc;
         }
-        protected override Task PublishBlackboardAsync(DWISData data, CancellationToken token)
+        protected override Task PublishBlackboardChangesAsync(BaseStarSnapshot snapshot, IEnumerable<int> changes,
+            CancellationToken token)
         {
             Publishes++;
             if (FailPublish) throw new InvalidOperationException("Simulated publish failure");
@@ -134,7 +136,7 @@ public class RecoveryTests
             Dictionary<string, string>? ids, Dictionary<string, UnitConversion>? conversions)
         {
             Reads++;
-            ((DWIS.DAQBridge.BaseStar.Model.MechanicalSubOutputDataMudPulseTelemetry)data!).AnnulusPressure = new ScalarProperty { Value = 1 };
+                ((DWIS.DAQBridge.BaseStar.Model.MechanicalSubOutputData)data!).AnnulusPressure = new ScalarProperty { Value = 1 };
             if (DisconnectDuringRead) ((ClientStub)_OPCUAClient!).Connected = false;
             if (FailRead) throw new InvalidOperationException("Simulated transport failure");
             return Task.CompletedTask;

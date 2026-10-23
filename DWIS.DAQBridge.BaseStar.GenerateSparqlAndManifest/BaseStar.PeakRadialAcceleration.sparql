@@ -19,6 +19,7 @@ WHERE {
 	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredPeakRadialAcceleration_01 .
 	?GaussianUncertaintyBaseStarMeasuredPeakRadialAcceleration_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredPeakRadialAcceleration_01 .
 	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
 	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
 	?pipeSection_01 rdf:type ddhub:PipeSectionMechanicalLogicalElement .
 	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsMechanicallyLocatedAt ?pipeSection_01 .
@@ -29,4 +30,15 @@ WHERE {
 	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
 	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsProvidedBy ?Halliburton_01 .
 	?BaseStarMeasuredRadialAcceleration_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?BaseStarMeasuredPeakRadialAcceleration_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
 }

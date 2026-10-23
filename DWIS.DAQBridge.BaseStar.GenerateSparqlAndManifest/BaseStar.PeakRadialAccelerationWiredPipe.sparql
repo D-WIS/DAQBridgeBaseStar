@@ -1,0 +1,44 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredPeakRadialAccelerationWiredPipe
+WHERE {
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:HasDynamicValue ?BaseStarMeasuredPeakRadialAccelerationWiredPipe .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:accelerationDrilling .
+	?MovingMaxBaseStarMeasuredPeakRadialAccelerationWiredPipe rdf:type ddhub:MovingMax .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:IsTransformationOutput ?MovingMaxBaseStarMeasuredPeakRadialAccelerationWiredPipe .
+	?BaseStarMeasuredRadialAccelerationWiredPipe_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredRadialAccelerationWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredRadialAccelerationWiredPipe_01 ddhub:HasDynamicValue ?BaseStarMeasuredRadialAccelerationWiredPipe .
+	?BaseStarMeasuredRadialAccelerationWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:accelerationDrilling .
+	?BaseStarMeasuredRadialAccelerationWiredPipe_01 ddhub:IsTransformationInput ?MovingMaxBaseStarMeasuredPeakRadialAccelerationWiredPipe .
+	?GaussianUncertaintyBaseStarMeasuredPeakRadialAccelerationWiredPipe_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredPeakRadialAccelerationWiredPipe_01 .
+	?GaussianUncertaintyBaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:IsTransmittedBy ?wiredPipeTelemetry .
+	?pipeSection_01 rdf:type ddhub:PipeSectionMechanicalLogicalElement .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:IsMechanicallyLocatedAt ?pipeSection_01 .
+	?BaseStarMeasuredRadialAccelerationWiredPipe_01 ddhub:IsMechanicallyLocatedAt ?pipeSection_01 .
+	?RadialReferenceFrame_01 rdf:type ddhub:RadialReferenceFrame .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:HasReferenceFrame ?RadialReferenceFrame_01 .
+	?BaseStarMeasuredRadialAccelerationWiredPipe_01 ddhub:HasReferenceFrame ?RadialReferenceFrame_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?BaseStarMeasuredRadialAccelerationWiredPipe_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?BaseStarMeasuredPeakRadialAccelerationWiredPipe_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
+}

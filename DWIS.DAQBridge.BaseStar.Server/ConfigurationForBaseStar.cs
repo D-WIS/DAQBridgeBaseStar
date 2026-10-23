@@ -9,7 +9,12 @@ namespace DWIS.DAQBridge.BaseStar.Server
 {
     public class ConfigurationForBaseStar : ConfigurationForOPCUA
     {
+        /// <summary>Optional namespace override keyed by the signal's default OPC-UA ID.</summary>
+        public Dictionary<string, string>? OPCUANameSpaces { get; set; }
+
         public TimeSpan ConnectionRetryInterval { get; set; } = TimeSpan.FromSeconds(5);
+        public TimeSpan MudPulsePublishInterval { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan WiredPipePublishInterval { get; set; } = TimeSpan.FromSeconds(2.5);
 
         public bool EnableDataLogging { get; set; } = true;
         public string DataLogDirectory { get; set; } = "/home";

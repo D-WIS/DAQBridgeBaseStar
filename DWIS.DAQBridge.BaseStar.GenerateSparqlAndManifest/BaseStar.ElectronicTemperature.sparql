@@ -14,6 +14,7 @@ WHERE {
 	?BaseStarMeasuredElectronicTemperature_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredElectronicTemperature_01 .
 	?GaussianUncertaintyBaseStarMeasuredElectronicTemperature_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredElectronicTemperature_01 .
 	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
 	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsTransmittedBy ?mudPulseTelemetry .
 	?topOfStringJunction_01 rdf:type ddhub:TopOfStringJunction .
 	?stringHydraulicBranch_01 rdf:type ddhub:HydraulicBranch .
@@ -27,4 +28,15 @@ WHERE {
 	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
 	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
 	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?BaseStarMeasuredElectronicTemperature_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
 }

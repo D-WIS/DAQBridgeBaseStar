@@ -10,6 +10,14 @@ This project implements the runtime bridge that reads Base Star mechanical sub d
 - Connects to a configured OPC-UA endpoint and subscribes to Base Star signals.
 - Maps incoming values to the Base Star semantic model.
 - Publishes signal updates into the D-WIS Blackboard.
+- Represents each measurement separately on mud-pulse and wired-pipe telemetry.
+- Publishes changed mud-pulse and wired-pipe values on independently configurable cadences.
+
+`MudPulsePublishInterval` defaults to 30 seconds and `WiredPipePublishInterval`
+defaults to 2.5 seconds. `OPCUANameSpaces` and `OPCUAIDs` are keyed by the signal's
+default ID, such as `AnnulusPressure` and `AnnulusPressureWiredPipe`, so each of the
+52 input tags can use its own namespace and NodeID. The global `NameSpace` and
+`NodeIDPrefix` remain fallback settings for compatibility.
 
 ## When to use it
 - In deployments where Base Star live data must be bridged into D-WIS.
@@ -173,3 +181,10 @@ The OPC-UA node ids are identical to the internal ones and the unit conversion f
 }
 
 ```
+
+
+## Downhole contract runtime
+This Server host runs `RuntimeHost` for BaseStar. See the repository README and sibling Common
+runtime README for `/home/config.json`, explicit identity/node/unit mappings, telemetry,
+reconnection, persistent logging and Docker build contexts. Existing legacy workers are not
+registered by this host.

@@ -1,0 +1,44 @@
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ddhub:<http://ddhub.no/>
+PREFIX quantity:<http://ddhub.no/UnitAndQuantity/>
+
+SELECT ?BaseStarMeasuredAverageCorrectedTorqueWiredPipe
+WHERE {
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 rdf:type ddhub:CorrectedMeasurement .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:HasDynamicValue ?BaseStarMeasuredAverageCorrectedTorqueWiredPipe .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?MovingAverageBaseStarMeasuredAverageCorrectedTorqueWiredPipe rdf:type ddhub:MovingAverage .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:IsTransformationOutput ?MovingAverageBaseStarMeasuredAverageCorrectedTorqueWiredPipe .
+	?taringTransformationAverageTorqueWiredPipe rdf:type ddhub:SummationTransformation .
+	?BaseStarMeasuredAverageRawTorqueWiredPipe_01 rdf:type ddhub:DerivedMeasurement .
+	?BaseStarMeasuredAverageRawTorqueWiredPipe_01 rdf:type ddhub:ContinuousDataType .
+	?BaseStarMeasuredAverageRawTorqueWiredPipe_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?BaseStarMeasuredAverageRawTorqueWiredPipe_01 ddhub:IsTransformationInput ?taringTransformationAverageTorqueWiredPipe .
+	?TorqueBiasForWiredPipeTelemetry_01 rdf:type ddhub:ProcessData .
+	?TorqueBiasForWiredPipeTelemetry_01 rdf:type ddhub:ContinuousDataType .
+	?TorqueBiasForWiredPipeTelemetry_01 ddhub:IsOfMeasurableQuantity quantity:torqueDrilling .
+	?TorqueBiasForWiredPipeTelemetry_01 ddhub:IsTransformationInput ?taringTransformationAverageTorqueWiredPipe .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:IsTransformationOutput ?taringTransformationAverageTorqueWiredPipe .
+	?GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 rdf:type ddhub:GaussianUncertainty .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:HasUncertainty ?GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 .
+	?GaussianUncertaintyBaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:HasUncertaintyMean ?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 .
+	?mudPulseTelemetry rdf:type ddhub:MudPulseTelemetry .
+	?wiredPipeTelemetry rdf:type ddhub:WiredPipeTelemetry .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:IsTransmittedBy ?wiredPipeTelemetry .
+	?BHA_01 rdf:type ddhub:BHAMechanicalLogicalElement .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:IsMechanicallyLocatedAt ?BHA_01 .
+	?Halliburton_01 rdf:type ddhub:InstrumentationCompany .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:IsProvidedBy ?Halliburton_01 .
+	?baseStarModel rdf:type ddhub:InstrumentModel .
+	?baseStarModel ddhub:ModelIdentifier "Halliburton/BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?baseStarModel ddhub:ModelName "BaseStar"^^<http://www.w3.org/2001/XMLSchema#string> .
+	?halliburton rdf:type ddhub:DrillingDataEcosystemOrganization .
+	?baseStarModel ddhub:HasManufacturer ?halliburton .
+	?baseStarUnit rdf:type ddhub:InstrumentInstance .
+	?baseStarUnit rdf:type ddhub:InstrumentedSub .
+	?baseStarUnit ddhub:IsOfInstrumentModel ?baseStarModel .
+	?baseStarUnit ddhub:SupportsTelemetry ?mudPulseTelemetry .
+	?baseStarUnit ddhub:SupportsTelemetry ?wiredPipeTelemetry .
+	?BaseStarMeasuredAverageCorrectedTorqueWiredPipe_01 ddhub:IsLocatedAtEquipment ?baseStarUnit .
+}

@@ -1,4 +1,7 @@
 # Bridge for the Base Star Mechanical Sub
+
+The active hosts use the shared downhole contract runtime described below. Earlier scalar-worker
+sections document the retained model/library implementation, which is not registered by the hosts.
 A .NET solution that bridges Halliburton's Base Star mechanical sub signals to the DWIS Blackboard, including shared semantic models, manifest generation, and OPC-UA integration helpers.
 
 ## Solution overview
@@ -28,7 +31,7 @@ The solution is organized around a single goal: reliably map Base Star signals i
 - Keep the semantic model updated before regenerating manifests.
 - Verify signal publication using the sink after any mapping changes.
 
-## Server connection recovery
+## Retained scalar worker connection recovery
 The Server waits until both the configured OPC-UA endpoint and DWIS Blackboard are
 connected before registering signals and starting data exchange. Unavailable endpoints
 at startup are retried without stopping the hosted worker. A disconnected client or an
@@ -58,14 +61,17 @@ consumers should now use `MaxRawWeight.Value`. It does not introduce a standard
 deviation input or populate a separate uncertainty signal. Existing Blackboard
 node identities and stored values are retained; no data migration is required.
 
-## Compact data logging and Blackboard history
-The Server compares immutable numeric snapshots after each OPC-UA poll. Source
+## Retained scalar worker logging and history
+The Server compares immutable numeric snapshots after each OPC-UA poll. The 26
+measurements are represented as 52 signals: one mud-pulse signal and one wired-pipe
+signal for every measurement. Source
 timestamps, queries, manifests, and other semantic metadata do not participate in
 change detection. The first available sample establishes a baseline. Later polls
 with identical values create no file records, history updates, or ordinary signal
 writes. When publication is due, only changed finite signal values are sent to the
 Blackboard; intermediate samples are retained in the raw log while publication
-keeps the existing `LoopDuration` cadence. Missing/non-finite values are represented
+uses independent `MudPulsePublishInterval` (30 seconds) and
+`WiredPipePublishInterval` (2.5 seconds) cadences. Missing/non-finite values are represented
 as `null` in logs and are not written to double-valued signal tags.
 
 Configuration defaults (also shown in `home/config.json`):
@@ -76,17 +82,22 @@ Configuration defaults (also shown in `home/config.json`):
   "DataLogDirectory": "/home",
   "DataLogSegmentDuration": "06:00:00",
   "MaximumDataLogStorageBytes": 1073741824,
-  "EnableBlackboardHistory": true
+  "EnableBlackboardHistory": true,
+  "MudPulsePublishInterval": "00:00:30",
+  "WiredPipePublishInterval": "00:00:02.500"
 }
 ```
 
-Files named `basestar-raw-<UTC start>.jsonl` and
-`basestar-published-<UTC start>.jsonl` contain a schema line (`format`, `units`,
+Files named `basestar-raw-v2-<UTC start>.jsonl` and
+`basestar-published-v2-<UTC start>.jsonl` contain a schema line (`format`, `units`,
 ordered `fields`) followed by records containing only `t` (UTC observation/publication
-time) and `v` (an array of canonical SI values in that field order). ìRawî means
+time) and `v` (an array of canonical SI values in that field order). ‚ÄúRaw‚Äù means
 received values **after** input unit conversion to SI. These are compact complete
 snapshots, not serialized domain objects. Each stream appends only when its values
 change. Six-hour default boundaries are 00:00, 06:00, 12:00, and 18:00 UTC.
+The v2 name separates the 52-field layout from retained 26-field v1 chunks. The
+storage cap maintains both generations. A v1 Blackboard history slot is replaced
+with a v2 payload when that slot first receives a new sample, preventing mixed schemas.
 
 Completed segments are ZIP-compressed through a temporary file and atomic rename.
 Maintenance also runs during quiet polls and connection retries. The combined size
@@ -109,7 +120,7 @@ files. Raw and published history each use eight fixed six-hour UTC slots; the sl
 is the absolute six-hour bucket number modulo eight. Slots are reused after 48 hours.
 Expiry maintenance clears stale payloads even without new samples or while the
 source is offline and the Blackboard remains reachable, so retention is
-at most 48 hours (42ñ48 hours at bucket granularity). History consumers must also
+at most 48 hours (42‚Äì48 hours at bucket granularity). History consumers must also
 honor bucket timestamps while the bridge is offline, since an offline bridge cannot
 clear server tags. This history window is fixed and independent of file size limits.
 
@@ -123,7 +134,14 @@ not bytes, so tag payload sizes still depend on the actual change rate. No offli
 sample queue or standalone OPCUASource recovery behavior is added.
 
 ## Semantic model and generated contracts
-The annotations in `MechanicalSubOutputDataMudPulseTelemetry` are authoritative.
+The annotations in `MechanicalSubOutputData` are authoritative.
+Each telemetry pair identifies the instrument as the Halliburton BaseStar model and
+the same BaseStar instrument instance. Its delivered measurement is separately named
+and linked to either `MudPulseTelemetry` or `WiredPipeTelemetry`; the instrument
+declares support for both paths. This distinguishes BaseStar signals from equivalent
+measurements supplied by DrillView, BlackStream, and other downhole instruments.
+Measurement-principle facts are intentionally absent where the available BaseStar
+specification does not establish a principle for that sensor.
 The shared raw rotational-speed node is consistently `DerivedMeasurement`, matching
 its established classification in the maximum-speed and stick-slip descriptions.
 Maximum bit torque's correction uses `BaseStarMeasuredMaxRawTorque`, not average
@@ -139,7 +157,7 @@ dotnet run --project .\DWIS.DAQBridge.BaseStar.ExportDataStructures\DWIS.DAQBrid
 ```
 
 The first regenerates `BaseStar.<signal>.json`, `BaseStar.<signal>.sparql`, and
-`MechanicalSubOutputDataMudPulseTelemetry.md` in its project directory. The second
+`MechanicalSubOutputData.md` in its project directory. The second
 regenerates `<signal>Manifest.json` in `DWIS.DAQBridge.BaseStar.Schemas`. Each tool
 also accepts an explicit output directory after `--`. Do not hand-edit generated
 artifacts. The scalar runtime manifests provide one primary double per signal;
@@ -162,7 +180,7 @@ input unit conversion, and Blackboard transfer. `DataLoggingTests` covers compac
 serialization, change detection, per-signal publication, rotation/compression,
 storage limits and file ownership, history restoration/expiry, write rejection,
 and continued publication during file logging failures. `SemanticContractTests`
-checks the corrected annotations and all 26 exported manifests/query files against
+checks the corrected annotations and all 52 exported manifests/query files against
 the runtime contract.
 Live recovery can be checked with isolated OPC-UA and Blackboard instances by starting
 the Server before either dependency, then stopping and restarting each dependency while
@@ -170,14 +188,14 @@ observing retry and resumed-exchange messages.
 
 ## Reproducible simulator and container releases
 The OPCUASource now generates plausible scalar SI samples with a configurable seed
-and independent schedules: conditions every 10 seconds, mechanical/dynamic data every
-30 seconds, and unchanged OPC-UA republishes every 5 seconds. Settings are
+and independent schedules. Mud-pulse dynamics default to 30 seconds and wired-pipe
+values default to 2.5 seconds. Only changed OPC-UA tags are written. Settings are
 `SimulationSeed`, `SimulationConditionGenerationPeriod`,
-`SimulationDataGenerationPeriod`, and `SimulationOPCUAPublishPeriod`; restart the
+`SimulationDataGenerationPeriod`, `SimulationWiredPipeDataGenerationPeriod`, and
+`SimulationOPCUAPublishPeriod`; restart the
 simulator after editing them. See `config/config.example.json` and the OPCUASource
 README for signal conventions and limitations. Generation is reproducible across
-polling cadences and skipped polls. Republishing unchanged values exercises the
-Server's change detection. These synthetic values are not vendor calibration.
+polling cadences and skipped polls. These synthetic values are not vendor calibration.
 
 Both Dockerfiles build from the solution root and restore their Model dependency
 explicitly. They run as the .NET non-root user (UID 1654). Mount a persistent, writable
@@ -195,3 +213,50 @@ It restores, builds and tests the solution in Release before publishing both ima
 `sha-<full commit SHA>` tags. Existing `DOCKERHUB_USERNAME` and `DOCKERHUB_PASSWORD`
 repository secrets are required. The workflow publishes images; deployment is separate.
 Use the immutable SHA tag when reproducibility is required.
+
+## DWIS package versions
+DWIS dependencies are selected in the Model project: RigOS Common Worker
+1.0.7 and OPC Foundation client 2.2.54, resolving Blackboard packages
+2.2.34 and vocabulary 1.0.176 through their package dependencies. DrillingProperties
+10.2.11 is pinned so semantic attributes are emitted in manifests and SPARQL.
+
+
+## Shared downhole mechanical contract
+
+The active Server, OPCUASource and BlackboardSink hosts now use the shared runtime in
+`../Common/DWIS.RigOS.DownholeMechanical.Bridge` and contract version v1 in
+`DWIS.RigOS.Contracts.DownholeMechanical` (package 1.0.0). See that runtime README for the
+identity/placement algorithm, callbacks, telemetry, compact six-hour logs, retention and tests.
+The earlier source/model classes and generated scalar artifacts remain preserved; their old
+workers are not registered alongside the new hosts. Existing flat configuration must be migrated
+explicitly to the instrument/channel mappings; no existing volume/configuration is overwritten.
+
+Copy `config/downhole.config.example.json` to the host's `/home/config.json`. Sample IDs are
+simulation fixtures, not discovered production equipment. The paired
+`config/downhole.drillstring.example.json` illustrates the required current DrillString JSON.
+Map real EquipmentIdentity.EquipmentInstanceID, SensorID, ComponentID and SensorTypeInt explicitly.
+Namespace URI, string/full OPC-UA NodeID and source unit are configurable for every scalar tag.
+Use `DWIS_CONFIG_PATH` and `--validate-config` for local checks. Unsupported channels are absent;
+missing or stale configured values are null. Manufacturer, brand/model and serial/asset values
+are read from current context, not guessed from tag names. No WebApp is added.
+
+The simulator is an OPC-UA server exposing individual double values and source timestamps.
+It listens on OPCUAURL (example port 48131). The bridge connects to that endpoint;
+the sink subscribes to compound Blackboard outputs. In Docker, give each host a separate bind
+volume under `C:/Volumes` mounted at `/home`; use routable addresses such as
+`host.docker.internal` in bridge/sink configurations. Bind the simulator to `0.0.0.0` inside
+its container and map the configured port. ContractsPublicBaseUrl must be reachable by viewers,
+for example `http://host.docker.internal:54321/` for the local contract service. Its image must
+be rebuilt/published to serve the new DownholeMechanical routes. The contextual DrillString
+bridge must also include the refreshed generated DTOs so it does not discard identity fields.
+
+Docker builds use a context containing sibling `DAQBridgeBaseStar/` and `Common/` folders.
+The manual GitHub workflow takes the full Common source commit SHA, verifies/builds/tests, then
+publishes Server, OPCUASource and BlackboardSink images as `stable` plus immutable provider/Common
+revision tags. No workflow is dispatched as part of implementation. Existing BaseStar local
+changes are preserved and its regression tests continue to run.
+
+BaseStar accepts mud pulse only, or mud pulse plus wired pipe; every configured instrument
+must have a mud-pulse path. The example preserves the 26 inspected legacy channel meanings
+and illustrates one mud-only unit and one dual-telemetry unit. Additional accelerometer/gyro/
+magnetometer/bending channels can be mapped explicitly without inventing their statistics.
