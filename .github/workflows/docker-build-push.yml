@@ -18,8 +18,8 @@ jobs:
       - run: dotnet test DWIS.DAQBridge.BaseStar.sln -c Release --no-build
       - name: Validate provider configuration
         env:
-          DWIS_CONFIG_PATH: config/downhole.config.example.json
-        run: dotnet run --project DWIS.DAQBridge.BaseStar.Server/DWIS.DAQBridge.BaseStar.Server.csproj -c Release --no-build -- --validate-config
+          DWIS_CONFIG_PATH: ${{ github.workspace }}/config/downhole.config.example.json
+        run: dotnet DWIS.DAQBridge.BaseStar.Server/bin/Release/net8.0/DWIS.DAQBridge.BaseStar.Server.dll --validate-config
       - name: Verify packaged OPC-UA configuration assets
         shell: pwsh
         run: |
