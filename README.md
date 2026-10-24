@@ -304,3 +304,5 @@ UUIDs, telemetry timing and mounted histories are preserved during upgrades.
 Runtime 1.0.5 independently advertises configured manufacturer/model and sensor ownership even
 without a current DrillString. DAQDisplay can label each model row while positions and readings
 remain explicitly unavailable until context validates. No configuration or contract schema change is required.
+
+The query lifecycle dependency release uses OPC Foundation client 2.2.55 (directly or through mechanical bridge 1.0.6) and Common.Worker 1.0.8 where applicable. Repeated query registrations are deduplicated and released when their session closes. Existing configuration and persistent volumes are preserved.
