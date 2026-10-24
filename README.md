@@ -222,8 +222,8 @@ DWIS dependencies are selected in the Model project: RigOS Common Worker
 ## Shared downhole mechanical contract
 
 The active Server, OPCUASource and BlackboardSink hosts now use the shared runtime in
-`DWIS.RigOS.DownholeMechanical.Bridge` NuGet (1.0.3) and contract version v1 in
-`DWIS.RigOS.Contracts.DownholeMechanical` (package 1.0.0). See that runtime README for the
+`DWIS.RigOS.DownholeMechanical.Bridge` NuGet (1.0.4) and contract version v1 in
+`DWIS.RigOS.Contracts.DownholeMechanical` (package 1.1.0). See that runtime README for the
 identity/placement algorithm, callbacks, telemetry, compact six-hour logs, retention and tests.
 The earlier source/model classes and generated scalar artifacts remain preserved; their old
 workers are not registered alongside the new hosts. Existing flat configuration must be migrated
@@ -249,7 +249,7 @@ be rebuilt/published to serve the new DownholeMechanical routes. The contextual 
 bridge must also include the refreshed generated DTOs so it does not discard identity fields.
 
 Docker builds use this repository root as their context; no sibling Common checkout is needed.
-The contract is pinned to NuGet 1.0.0 and runtime to 1.0.3. For example:
+The contract is pinned to NuGet 1.1.0 and runtime to 1.0.4. For example:
 `docker build -f DWIS.DAQBridge.BaseStar.Server/Dockerfile .`
 GitHub Actions builds and validates on pushes and pull requests. Only a manual workflow dispatch
 publishes Server, OPCUASource and BlackboardSink images as `stable` plus immutable commit-SHA tags.
@@ -277,11 +277,11 @@ origin. Every changed wired-pipe frame is published without an output throttle. 
 publication retains its one-second minimum interval, allowing each arrival through. MaximumInputAge is 120 seconds, longer than a full
 mud-pulse cycle, so ordinary interleaving does not blank healthy slow channels.
 
-Runtime 1.0.3 is published from Common through NuGet Trusted Publishing. Restore from nuget.org;
+Runtime 1.0.4 is published from Common through NuGet Trusted Publishing. Restore from nuget.org;
 no local feed or ProjectReference to Common is needed. Pushes run verification; Docker image
 publication and deployment remain separate release steps.
 
-## Runtime 1.0.3 delivery and durability
+## Runtime 1.0.4 delivery and durability
 OPC-UA subscription callbacks preserve every source sample, including multiple queued changes
 for the same node. The bridge force-flushes each received batch to its compact input journal
 before processing it; six-hour rotation and the shared storage limit still apply. Placement
@@ -292,3 +292,11 @@ The current DrillString must be advertised on the Blackboard after a Blackboard 
 a measurement source alone does not restore contextual semantics. Equipment identity and sensor
 positions are resolved from that description. WiredPipePublishInterval is retained as a simulator
 fallback when SimulatorProductionInterval is omitted; it no longer drops wired-pipe arrivals.
+
+## Polar bending support
+Runtime 1.0.4 uses mechanical contract 1.1.0. Configured polar inputs use
+`BendingMomentMagnitude` (N.m) and `BendingMomentAngle` (SI radians), both with
+`Axis=None`. Source angle units may be `rad` or `deg`. Cartesian `BendingMoment`
+X/Y inputs remain supported. Schema and metadata explicitly identify both forms;
+the runtime does not invent counterpart channels. Existing configurations, physical
+UUIDs, telemetry timing and mounted histories are preserved during upgrades.
