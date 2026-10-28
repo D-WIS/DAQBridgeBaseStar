@@ -222,7 +222,7 @@ DWIS dependencies are selected in the Model project: RigOS Common Worker
 ## Shared downhole mechanical contract
 
 The active Server, OPCUASource and BlackboardSink hosts now use the shared runtime in
-`DWIS.RigOS.DownholeMechanical.Bridge` NuGet (1.0.5) and contract version v1 in
+`DWIS.RigOS.DownholeMechanical.Bridge` NuGet (1.0.7) and contract version v1 in
 `DWIS.RigOS.Contracts.DownholeMechanical` (package 1.1.0). See that runtime README for the
 identity/placement algorithm, callbacks, telemetry, compact six-hour logs, retention and tests.
 The earlier source/model classes and generated scalar artifacts remain preserved; their old
@@ -249,7 +249,7 @@ be rebuilt/published to serve the new DownholeMechanical routes. The contextual 
 bridge must also include the refreshed generated DTOs so it does not discard identity fields.
 
 Docker builds use this repository root as their context; no sibling Common checkout is needed.
-The contract is pinned to NuGet 1.1.0 and runtime to 1.0.5. For example:
+The contract is pinned to NuGet 1.1.0 and runtime to 1.0.7. For example:
 `docker build -f DWIS.DAQBridge.BaseStar.Server/Dockerfile .`
 GitHub Actions builds and validates on pushes and pull requests. Only a manual workflow dispatch
 publishes Server, OPCUASource and BlackboardSink images as `stable` plus immutable commit-SHA tags.
@@ -306,3 +306,7 @@ without a current DrillString. DAQDisplay can label each model row while positio
 remain explicitly unavailable until context validates. No configuration or contract schema change is required.
 
 The query lifecycle dependency release uses OPC Foundation client 2.2.55 (directly or through mechanical bridge 1.0.6) and Common.Worker 1.0.8 where applicable. Repeated query registrations are deduplicated and released when their session closes. Existing configuration and persistent volumes are preserved.
+
+Runtime 1.0.7: simulator and bridge wait quietly for valid instrument configuration,
+reload every five seconds, and start automatically when corrected. Validation-only mode
+still fails immediately. Existing configuration and persistent storage are unchanged.
